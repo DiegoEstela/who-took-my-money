@@ -1,12 +1,15 @@
-import { Typography, useTheme, Box } from "@mui/material";
+import { Typography, useTheme, Box, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import arturoImg from "../assets/arturo.png";
+import React from "react";
 
 interface ChatBubbleProps {
-  text: string;
+  text: string | React.ReactNode; // 🔹 Permite string o JSX
+  buttonText?: string;
+  onButtonClick?: () => void;
 }
 
-const ChatBubble = ({ text }: ChatBubbleProps) => {
+const ChatBubble = ({ text, buttonText, onButtonClick }: ChatBubbleProps) => {
   const theme = useTheme();
 
   return (
@@ -16,14 +19,24 @@ const ChatBubble = ({ text }: ChatBubbleProps) => {
       transition={{ duration: 0.6, ease: "easeOut" }} // Transición suave
     >
       <Box sx={styles.chatBubble(theme)}>
-        {/* Imagen de Arturo */}
         <Box component="img" src={arturoImg} alt="Arturo" sx={styles.image} />
 
-        {/* Contenedor del texto */}
         <Box sx={styles.textContainer}>
-          <Typography variant="body1" textAlign="center">
-            {text}
-          </Typography>
+          {typeof text === "string" ? (
+            <Typography variant="body1" textAlign="center">
+              {text}
+            </Typography>
+          ) : (
+            <Typography variant="body1" textAlign="left" component="div">
+              {text}
+            </Typography>
+          )}
+
+          {buttonText && onButtonClick && (
+            <Button variant="contained" onClick={onButtonClick} sx={{ mt: 2 }}>
+              {buttonText}
+            </Button>
+          )}
         </Box>
       </Box>
     </motion.div>

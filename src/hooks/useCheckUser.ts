@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../db/firebase";
+import { useEffect, useState } from "react";
+import { auth } from "../db/firebase"; // Importa Firebase Auth
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useNavigate } from "react-router-dom";
 
 const useCheckUser = () => {
   const [user, loading] = useAuthState(auth);
-  const [userExists, setUserExists] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
-  const navigate = useNavigate();
+  const [userExists, setUserExists] = useState(false);
+  const db = getFirestore();
 
   useEffect(() => {
     const checkUserInFirestore = async () => {
-      if (loading) return;
       if (!user) {
+        setUserExists(false);
         setCheckingUser(false);
-        navigate("/login");
         return;
       }
 
@@ -23,9 +21,7 @@ const useCheckUser = () => {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
-        if (userSnap.exists()) {
-          setUserExists(true);
-        }
+        setUserExists(userSnap.exists());
       } catch (error) {
         console.error("Error verificando usuario en Firestore:", error);
       } finally {
@@ -34,21 +30,9 @@ const useCheckUser = () => {
     };
 
     checkUserInFirestore();
-  }, [user, loading, navigate]);
+  }, [user, db]);
 
-  const saveUserToFirestore = async (userData: any) => {
-    if (user) {
-      try {
-        const userRef = doc(db, "users", user.uid);
-        await setDoc(userRef, userData);
-        navigate("/home");
-      } catch (error) {
-        console.error("Error guardando usuario en Firestore:", error);
-      }
-    }
-  };
-
-  return { user, loading, userExists, checkingUser, saveUserToFirestore };
+  return { user, userExists, loading, checkingUser };
 };
 
 export default useCheckUser;

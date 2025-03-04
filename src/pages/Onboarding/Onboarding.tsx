@@ -1,53 +1,51 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { doc, setDoc } from "firebase/firestore";
+import useCheckUser from "../../hooks/useCheckUser";
 
 import StepWelcome from "./StepWelcome";
 import Loading from "../../components/Loading";
-import useCheckUser from "../../hooks/useCheckUser";
 import BookBackground from "../../components/BookBackgound";
 import StepSalary from "./StepSalary";
 import StepFixedExpenses from "./StepFixedExpenses";
+import StepCompletion from "./StepCompletion";
+import StepFinish from "./StepFinish";
+import { db } from "../../db/firebase";
+import { useNotification } from "../../context/useNotification";
 
-// Definir la estructura de los datos del formulario
 type OnboardingFormData = {
   name: string;
   salary?: number;
-  fixedExpenses?: number;
-  variableExpenses?: number;
+  fixedExpenses?: Record<string, number>;
+  variableExpenses?: Record<string, { percentage: number; amount: number }>;
 };
 
-// Lista de pasos dinámicos con la estructura correcta
 const steps = [
   { key: "name", component: StepWelcome },
   { key: "salary", component: StepSalary },
   { key: "fixedExpenses", component: StepFixedExpenses },
+  { key: "VariableExpenses", component: StepCompletion },
+  { key: "StepFinish", component: StepFinish },
 ];
 
 const Onboarding = () => {
-  const { userExists, loading, checkingUser, saveUserToFirestore } =
-    useCheckUser();
+  const { user, loading, checkingUser } = useCheckUser();
+  const { showNotification } = useNotification();
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
 
-  // Hook Form - Control del estado del formulario
   const methods = useForm<OnboardingFormData>({
     defaultValues: {
       name: "",
       salary: undefined,
+      fixedExpenses: {},
+      variableExpenses: {},
     },
   });
 
-  const { handleSubmit, getValues, setValue } = methods;
-
-  console.log(getValues());
-
-  // Redirección automática si el usuario ya existe
-  useEffect(() => {
-    if (userExists) navigate("/home");
-  }, [userExists, navigate]);
+  const { getValues, setValue, handleSubmit } = methods;
 
   if (loading || checkingUser) return <Loading />;
 
@@ -63,8 +61,35 @@ const Onboarding = () => {
     }
   };
 
-  const handleFinish = () => {
-    handleSubmit(saveUserToFirestore as SubmitHandler<OnboardingFormData>)();
+  // 📌 Guardar en Firestore con el UID del usuario autenticado
+  const handleSaveToDB: SubmitHandler<OnboardingFormData> = async (data) => {
+    if (!user?.uid) {
+      console.error("No se pudo obtener el UID del usuario.");
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "users", user.uid), {
+        ...data,
+        remainingAmount:
+          (data.salary || 0) -
+          (data.fixedExpenses?.totalExpenses || 0) -
+          Object.values(data.variableExpenses || {}).reduce(
+            (sum, exp) => sum + exp.amount,
+            0
+          ),
+        timestamp: new Date(),
+      });
+
+      // 📌 Mostrar notificación de éxito
+      showNotification("success", "¡Tu perfil ha sido creado con éxito! 🎉");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error("Error al guardar en Firestore:", error);
+    }
   };
 
   const CurrentStepComponent = steps[activeStep]?.component || null;
@@ -72,22 +97,6 @@ const Onboarding = () => {
   return (
     <FormProvider {...methods}>
       <BookBackground>
-        {/* Contador de pasos */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 20,
-            right: 20,
-            background: "rgba(0,0,0,0.6)",
-            color: "white",
-            padding: "5px 10px",
-            borderRadius: "8px",
-            fontWeight: "bold",
-          }}
-        >
-          {activeStep + 1}/{steps.length}
-        </Box>
-
         <Box sx={{ maxWidth: 600, mx: "auto", py: 4 }}>
           {CurrentStepComponent && (
             <CurrentStepComponent
@@ -97,6 +106,7 @@ const Onboarding = () => {
                 setValue(name as keyof OnboardingFormData, value)
               }
               getValues={getValues}
+              handleSaveToDB={() => handleSubmit(handleSaveToDB)()}
             />
           )}
         </Box>

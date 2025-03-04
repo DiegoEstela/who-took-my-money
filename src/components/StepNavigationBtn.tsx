@@ -18,7 +18,7 @@ const StepNavigationBtn = ({
         display: "flex",
         justifyContent: "space-between",
         width: "100%",
-        mt: 2,
+        mt: 0,
       }}
     >
       <IconButton onClick={onBack} color="primary">

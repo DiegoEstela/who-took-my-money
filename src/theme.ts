@@ -42,7 +42,7 @@ const theme = createTheme({
       secondary: "linear-gradient(135deg, #FFD700, #FFA500)", //  Dorado a naranja
     },
     customColors: {
-      black: "#000000", //  Negro puro
+      black: "#424242",
       white: "#FFFFFF", //  Blanco puro
     },
   },

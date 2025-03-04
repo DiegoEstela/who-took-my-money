@@ -9,6 +9,9 @@
     "noImplicitAny": false, // Permite usar "any" sin advertencias
     "strictNullChecks": false, // Evita errores con valores nulos o indefinidos
     "strictFunctionTypes": false,
-    "strictPropertyInitialization": false
-  }
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+ 
 }

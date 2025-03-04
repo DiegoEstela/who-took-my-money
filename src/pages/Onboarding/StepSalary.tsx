@@ -1,4 +1,4 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, TextField, Typography, useTheme } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import ChatBubble from "../../components/ChatBubble";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
@@ -10,8 +10,10 @@ interface StepSalaryProps {
 }
 
 const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
+  const theme = useTheme();
   const { register, watch } = useFormContext();
   const salary = watch("salary", ""); // Se actualiza en tiempo real
+  const name = watch("name", "");
 
   const handleNext = () => {
     setValue("salary", Number(salary));
@@ -27,7 +29,11 @@ const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
         alignItems: "center",
       }}
     >
-      <Typography variant="h5" fontWeight="bold">
+      <Typography
+        variant="h5"
+        fontWeight="bold"
+        color={theme.palette.customColors.black}
+      >
         ¿Cuál es tu sueldo mensual? 💰
       </Typography>
 
@@ -50,7 +56,9 @@ const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
         disabled={!salary}
       />
 
-      <ChatBubble text="Eh... esto es un poco incómodo, pero... ¿me podrías decir cuál es tu sueldo mensual? Sin eso, no podré ayudarte. Es importante para que puedas aprovechar al máximo la app.  Prometo guardar el secreto mejor que un banco suizo. ¡Palabra de Arturo! 💰🤫" />
+      <ChatBubble
+        text={`Eh... esto es un poco incómodo ${name}, pero... ¿me podrías decir cuál es tu sueldo mensual? Sin eso, no podré ayudarte. Es importante para que puedas aprovechar al máximo la app.  Prometo guardar el secreto mejor que un banco suizo. ¡Palabra de Arturo! 💰🤫`}
+      />
     </Box>
   );
 };
