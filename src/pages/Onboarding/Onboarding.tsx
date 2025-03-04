@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { Box } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
 import useCheckUser from "../../hooks/useCheckUser";
 
@@ -34,7 +33,6 @@ const Onboarding = () => {
   const { user, loading, checkingUser } = useCheckUser();
   const { showNotification } = useNotification();
   const [activeStep, setActiveStep] = useState(0);
-  const navigate = useNavigate();
 
   const methods = useForm<OnboardingFormData>({
     defaultValues: {
