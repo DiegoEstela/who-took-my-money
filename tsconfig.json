@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": false, // Permite usar "any" sin advertencias
+    "strictNullChecks": false, // Evita errores con valores nulos o indefinidos
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false
+  }
+}
