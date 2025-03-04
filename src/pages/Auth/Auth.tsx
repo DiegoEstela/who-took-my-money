@@ -5,7 +5,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../db/firebase";
 import logo from "../../assets/LogoApp.png";
 import AuthForm from "../../components/authForm";
-import AuthButtons from "../../components/authButtons";
 
 const Auth = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -36,7 +35,6 @@ const Auth = () => {
       </Box>
 
       <AuthForm isRegister={isRegister} onSuccess={() => navigate("/")} />
-      <AuthButtons onSuccess={() => navigate("/")} />
 
       <Button sx={{ mt: 2 }} onClick={() => setIsRegister(!isRegister)}>
         {isRegister

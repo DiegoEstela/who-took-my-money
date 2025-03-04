@@ -1,71 +1,71 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Home from "./pages/Home/Home";
 import Auth from "./pages/Auth/Auth";
 import Onboarding from "./pages/Onboarding/Onboarding";
 import { NotificationProvider } from "./context/NotificationPopup";
 import Loading from "./components/Loading";
-import useCheckUser from "./hooks/useCheckUser"; // ✅ Importamos el hook actualizado
+import useCheckUser from "./hooks/useCheckUser";
+
+const queryClient = new QueryClient();
 
 const App = () => {
-  const { user, userExists, loading, checkingUser } = useCheckUser(); // ✅ Ahora `userExists` viene del hook
+  const { user, userExists, loading, checkingUser } = useCheckUser();
 
-  // Mientras se chequea el usuario, mostramos una pantalla de carga
   if (loading || checkingUser) return <Loading />;
 
   return (
-    <NotificationProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Auth />} />
-
-          {/* Redirección basada en Firestore */}
-          <Route
-            path="/"
-            element={
-              user ? (
-                userExists ? (
-                  <Home />
+    <QueryClientProvider client={queryClient}>
+      <NotificationProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Auth />} />
+            <Route
+              path="/"
+              element={
+                user ? (
+                  userExists ? (
+                    <Home />
+                  ) : (
+                    <Navigate to="/onboarding" />
+                  )
                 ) : (
-                  <Navigate to="/onboarding" />
+                  <Navigate to="/login" />
                 )
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-
-          <Route
-            path="/onboarding"
-            element={
-              user ? (
-                userExists ? (
-                  <Navigate to="/home" />
+              }
+            />
+            <Route
+              path="/onboarding"
+              element={
+                user ? (
+                  userExists ? (
+                    <Navigate to="/home" />
+                  ) : (
+                    <Onboarding />
+                  )
                 ) : (
-                  <Onboarding />
+                  <Navigate to="/login" />
                 )
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-
-          <Route
-            path="/home"
-            element={
-              user ? (
-                userExists ? (
-                  <Home />
+              }
+            />
+            <Route
+              path="/home"
+              element={
+                user ? (
+                  userExists ? (
+                    <Home />
+                  ) : (
+                    <Navigate to="/onboarding" />
+                  )
                 ) : (
-                  <Navigate to="/onboarding" />
+                  <Navigate to="/login" />
                 )
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </NotificationProvider>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
+    </QueryClientProvider>
   );
 };
 
