@@ -4,7 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { FirebaseError } from "firebase/app"; // ✅ Importamos FirebaseError
+import { FirebaseError } from "firebase/app"; // Importamos FirebaseError
 import { auth, provider } from "../db/firebase";
 
 // Función para traducir errores de Firebase

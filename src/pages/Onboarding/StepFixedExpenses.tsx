@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Box, TextField, Button, Typography, IconButton } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import { Add, Delete } from "@mui/icons-material";
 import ChatBubble from "../../components/ChatBubble";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
@@ -17,7 +16,6 @@ const StepFixedExpenses = ({
   onBack,
   setValue,
 }: StepFixedExpensesProps) => {
-  const { register } = useFormContext();
   const [expenses, setExpenses] = useState<{ name: string; amount: number }[]>(
     []
   );
