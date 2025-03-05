@@ -11,10 +11,9 @@ interface StepFinishProps {
 
 const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
   const theme = useTheme();
-  const [step, setStep] = useState(1); // 🔹 Controla los pasos de los mensajes
-  const [showBubble, setShowBubble] = useState(true); // 🔹 Maneja la visibilidad de la burbuja
+  const [step, setStep] = useState(1);
+  const [showBubble, setShowBubble] = useState(true);
 
-  const name = getValues().name || "Usuario";
   const salary = getValues().salary || 0;
   const fixedExpenses = getValues().fixedExpenses || {};
   const variableExpenses = getValues().variableExpenses || {};
