@@ -16,22 +16,25 @@ import {
   CircularProgress,
   useTheme,
 } from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import BlockIcon from "@mui/icons-material/Block";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-
+import HomeIcon from "@mui/icons-material/Home"; // 🔹 Importamos el icono de Casa
 import { signOut } from "firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "../services/fetchUserProfile";
 import { auth } from "../db/firebase";
 
-const Navbar = ({ onOpenConfig }: any) => {
+const Navbar = () => {
   const theme = useTheme();
   const [openSidebar, setOpenSidebar] = useState(false);
   const userId = auth.currentUser?.uid;
+  const navigate = useNavigate();
+  const location = useLocation(); // 🔹 Obtener la ruta actual
 
   const { data, isLoading } = useQuery({
     queryKey: ["userProfileData", userId],
@@ -59,27 +62,29 @@ const Navbar = ({ onOpenConfig }: any) => {
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           {/* Botón para abrir Sidebar */}
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={() => toggleSidebar()}
-          >
+          <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
             <MenuIcon />
           </IconButton>
 
-          {/* Avatar con inicial del nombre */}
-          <IconButton onClick={onOpenConfig}>
+          {/* Mostrar Avatar o Casa según la ruta */}
+          <IconButton
+            onClick={() =>
+              navigate(location.pathname === "/profile" ? "/" : "/profile")
+            }
+          >
             {isLoading ? (
               <CircularProgress size={24} color="inherit" />
+            ) : location.pathname === "/profile" ? (
+              <HomeIcon sx={{ color: "#fff", fontSize: 30 }} /> // 🔹 Icono de Casa cuando estamos en "/profile"
             ) : (
-              <Avatar sx={{ bgcolor: "#4CAF50" }}>{avatarInitial}</Avatar>
+              <Avatar sx={{ bgcolor: "#4CAF50" }}>{avatarInitial}</Avatar> // 🔹 Avatar en cualquier otra página
             )}
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* Sidebar mejorado */}
-      <Drawer anchor="left" open={openSidebar} onClose={() => toggleSidebar()}>
+      {/* Sidebar */}
+      <Drawer anchor="left" open={openSidebar} onClose={toggleSidebar}>
         <Box
           sx={{
             width: 280,
@@ -90,7 +95,7 @@ const Navbar = ({ onOpenConfig }: any) => {
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
-            <IconButton onClick={() => toggleSidebar()}>
+            <IconButton onClick={toggleSidebar}>
               <CloseIcon sx={{ color: "#FF5733" }} />
             </IconButton>
           </Box>

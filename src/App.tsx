@@ -7,6 +7,7 @@ import { NotificationProvider } from "./context/NotificationPopup";
 import Loading from "./components/Loading";
 import useCheckUser from "./hooks/useCheckUser";
 import Navbar from "./components/Navbar";
+import Profile from "./pages/Profile/Profile";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => {
           {user && userExists && <Navbar />}
           <Routes>
             <Route path="/login" element={<Auth />} />
+            <Route path="/profile" element={<Profile />} />
             <Route
               path="/"
               element={

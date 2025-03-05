@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Box, TextField, Button } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import ChatBubble from "../../components/ChatBubble";
@@ -8,17 +8,13 @@ const StepWelcome = ({ onNext }: { onNext: () => void }) => {
   const name = watch("name", "");
   const [showBubble, setShowBubble] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowBubble(false), 4000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <Box textAlign="center">
       <ChatBubble
         text="¡Hola! Soy Arturo, tu asistente financiero. Antes de empezar, me gustaría saber cómo te llamas."
         onButtonClick={() => setShowBubble(false)}
         isVisible={showBubble}
+        buttonText="Empezar"
       />
       <TextField
         {...register("name", { required: true })}

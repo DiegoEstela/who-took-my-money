@@ -72,7 +72,7 @@ const styles = {
   },
   chatBubble: (theme: any) => ({
     position: "fixed",
-    top: "40px",
+    top: "15vh",
     left: "50%",
     transform: "translateX(-50%)",
     display: "flex",
@@ -84,7 +84,7 @@ const styles = {
     boxShadow: "2px 4px 10px rgba(0, 0, 0, 0.3)",
     zIndex: 1000,
     color: theme.palette.text.primary,
-    minWidth: "280px",
+    minWidth: "80vw",
     textAlign: "center",
   }),
   image: {
