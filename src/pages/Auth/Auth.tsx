@@ -22,7 +22,7 @@ const Auth = () => {
     <Paper
       elevation={5}
       sx={{
-        padding: 4,
+        padding: "20px",
         textAlign: "center",
         width: { xs: "90%", sm: 400 },
         borderRadius: 3,
