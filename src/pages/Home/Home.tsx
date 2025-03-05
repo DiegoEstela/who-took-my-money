@@ -71,8 +71,7 @@ const Home = () => {
         <Typography variant="body1">No hay gastos registrados aún.</Typography>
       )}
 
-      {/* ✅ Mostrar burbuja de Arturo por 2 segundos */}
-      {showChatBubble && <ChatBubble text={arturoMessage} />}
+      <ChatBubble text={arturoMessage} isVisible={showChatBubble} />
     </Box>
   );
 };
