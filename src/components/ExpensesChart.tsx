@@ -21,7 +21,12 @@ const ExpensesChart = ({
             <LinearProgress
               variant="determinate"
               value={Math.min((spentAmount / estimatedAmount) * 100, 100)} // No sobrepasa 100%
-              sx={{ height: 10, borderRadius: 5 }}
+              sx={{
+                height: 10,
+                borderRadius: 5,
+                background:
+                  "linear-gradient(135deg, #FFD700,rgba(255, 168, 5, 0.88))",
+              }}
             />
             <Typography variant="caption">
               Gastado: ${spentAmount.toLocaleString("es-ES")} / Presupuestado: $

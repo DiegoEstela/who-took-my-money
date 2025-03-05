@@ -17,7 +17,6 @@ const Home = () => {
     enabled: !!userId,
   });
 
-  // 🔹 Obtener la fecha actual
   const today = new Date();
   const formattedDate = today.toLocaleDateString("es-ES", {
     day: "numeric",
@@ -25,7 +24,6 @@ const Home = () => {
     year: "numeric",
   });
 
-  // 🔹 Mensajes de Arturo según el día del mes
   const dayOfMonth = today.getDate();
   let arturoMessage = "";
   if (dayOfMonth <= 10) {
@@ -57,7 +55,7 @@ const Home = () => {
   const realExpenses = data?.realExpenses ?? {};
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ paddingTop: 5 }}>
       {/* ✅ Nuevo título dinámico con fecha */}
       <Typography variant="h5" fontWeight="bold">
         📊 Tus gastos

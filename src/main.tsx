@@ -13,6 +13,7 @@ createRoot(document.getElementById("root")!).render(
         sx={{
           display: "flex",
           justifyContent: "center",
+          flexDirection: "column",
           textAlign: "center",
           alignItems: "center",
           height: "100vh",

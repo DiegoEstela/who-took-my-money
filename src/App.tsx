@@ -6,6 +6,7 @@ import Onboarding from "./pages/Onboarding/Onboarding";
 import { NotificationProvider } from "./context/NotificationPopup";
 import Loading from "./components/Loading";
 import useCheckUser from "./hooks/useCheckUser";
+import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <NotificationProvider>
         <BrowserRouter>
+          {user && userExists && <Navbar />}
           <Routes>
             <Route path="/login" element={<Auth />} />
             <Route
