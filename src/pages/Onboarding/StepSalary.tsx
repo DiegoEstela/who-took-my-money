@@ -1,4 +1,14 @@
-import { Box, TextField, Typography, useTheme } from "@mui/material";
+import { useState, useEffect } from "react";
+import {
+  Box,
+  TextField,
+  Typography,
+  useTheme,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import ChatBubble from "../../components/ChatBubble";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
@@ -12,12 +22,43 @@ interface StepSalaryProps {
 const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
   const theme = useTheme();
   const { register, watch } = useFormContext();
-  const salary = watch("salary", ""); // Se actualiza en tiempo real
+  const salary = watch("salary", "");
+  const currency = watch("currency", "USD"); // Valor por defecto
   const name = watch("name", "");
 
+  const [showBubble, setShowBubble] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowBubble(false), 4000); // Desaparece en 4 segundos
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleNext = () => {
-    setValue("salary", Number(salary));
+    setValue("salary", parseFloat(salary).toFixed(2)); // Guarda el salario con 2 decimales
     onNext();
+  };
+
+  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let rawValue = e.target.value.replace(/[^0-9.]/g, ""); // Permite solo números y un punto decimal
+
+    // Evitar múltiples puntos decimales
+    if ((rawValue.match(/\./g) || []).length > 1) {
+      return;
+    }
+
+    // Limitar a dos decimales
+    const parts = rawValue.split(".");
+    if (parts.length === 2 && parts[1].length > 2) {
+      rawValue = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
+
+    setValue("salary", rawValue);
+  };
+
+  const handleBlur = () => {
+    if (salary) {
+      setValue("salary", parseFloat(salary).toFixed(2)); // Asegura formato con 2 decimales al salir del input
+    }
   };
 
   return (
@@ -29,6 +70,12 @@ const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
         alignItems: "center",
       }}
     >
+      <ChatBubble
+        text={`Eh...${name}, esto es un poco incómodo , pero... ¿me podrías decir cuál es tu sueldo mensual y en qué moneda lo manejas? Es importante para que puedas aprovechar al máximo la app. ¡Palabra de Arturo! 💰🤫`}
+        onButtonClick={() => setShowBubble(false)}
+        isVisible={showBubble}
+      />
+
       <Typography
         variant="h5"
         fontWeight="bold"
@@ -37,27 +84,46 @@ const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
         ¿Cuál es tu sueldo mensual? 💰
       </Typography>
 
+      {/* Campo de salario */}
       <TextField
         {...register("salary")}
         type="text"
         label="Tu salario"
         variant="outlined"
-        value={salary ? salary.toLocaleString("es-ES") : ""} // Formateo en tiempo real
-        onChange={(e) => {
-          const rawValue = e.target.value.replace(/\D/g, ""); // Solo permite números
-          setValue("salary", rawValue ? Number(rawValue) : ""); // Guarda el número limpio
-        }}
+        value={salary}
+        onChange={handleSalaryChange}
+        onBlur={handleBlur} // Formatea a 2 decimales al perder el foco
         fullWidth
       />
+
+      {/* Selector de moneda */}
+      <FormControl fullWidth sx={{ mt: 2 }}>
+        <InputLabel id="currency-label" sx={{ top: "-8px" }}>
+          Moneda
+        </InputLabel>
+        <Select
+          labelId="currency-label"
+          value={currency}
+          onChange={(e) => setValue("currency", e.target.value)}
+          displayEmpty
+        >
+          <MenuItem value="" disabled>
+            Selecciona una moneda
+          </MenuItem>
+          <MenuItem value="USD">Dólar (USD)</MenuItem>
+          <MenuItem value="EUR">Euro (EUR)</MenuItem>
+          <MenuItem value="ARS">Peso Argentino (ARS)</MenuItem>
+          <MenuItem value="MXN">Peso Mexicano (MXN)</MenuItem>
+          <MenuItem value="COP">Peso Colombiano (COP)</MenuItem>
+          <MenuItem value="CLP">Peso Chileno (CLP)</MenuItem>
+          <MenuItem value="BRL">Real Brasileño (BRL)</MenuItem>
+        </Select>
+      </FormControl>
 
       <StepNavigationBtn
         onBack={onBack}
         onNext={handleNext}
-        disabled={!salary}
-      />
-
-      <ChatBubble
-        text={`Eh... esto es un poco incómodo ${name}, pero... ¿me podrías decir cuál es tu sueldo mensual? Sin eso, no podré ayudarte. Es importante para que puedas aprovechar al máximo la app.  Prometo guardar el secreto mejor que un banco suizo. ¡Palabra de Arturo! 💰🤫`}
+        disabled={!salary || !currency}
       />
     </Box>
   );

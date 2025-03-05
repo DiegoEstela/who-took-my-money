@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Box, Typography, Button, useTheme, Container } from "@mui/material";
+import { Box, Typography, Button, useTheme } from "@mui/material";
 import ChatBubble from "../../components/ChatBubble";
+import useFinancialProfile from "../../hooks/useFinancialProfile";
 
 interface StepFinishProps {
   onBack: () => void;
@@ -10,34 +11,50 @@ interface StepFinishProps {
 
 const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
   const theme = useTheme();
-  const [showAdvice, setShowAdvice] = useState(false);
-  const [adviceClosed, setAdviceClosed] = useState(false);
+  const [step, setStep] = useState(1); // 🔹 Controla los pasos de los mensajes
+  const [showBubble, setShowBubble] = useState(true); // 🔹 Maneja la visibilidad de la burbuja
 
   const name = getValues().name || "Usuario";
   const salary = getValues().salary || 0;
   const fixedExpenses = getValues().fixedExpenses || {};
   const variableExpenses = getValues().variableExpenses || {};
+  const { mensajeArturo } = useFinancialProfile(variableExpenses);
 
   const totalFixedExpenses = fixedExpenses.totalExpenses || 0;
   const totalVariableExpenses: any = Object.values(variableExpenses).reduce(
     (sum, exp: any) => sum + exp.amount,
     0
   );
-  let arturoMessage: React.ReactNode = `¡Muy bien, ${name}! Ya tenemos toda tu distribución de gastos.`;
 
-  if (showAdvice) {
-    arturoMessage = (
-      <Container sx={{ fontSize: "15px", margin: 0, padding: 0 }}>
-        ✅ <strong>Gastos fijos:</strong> No deberían superar el{" "}
-        <strong>50%</strong> de tus ingresos. <br />
-        💰 <strong>Ahorro:</strong> Destina al menos un <strong>20%</strong>{" "}
-        para futuros objetivos. <br />
-        🔍 <strong>Fondo de emergencia:</strong> Siempre útil. <br />
-        📊 <strong>Gastos variables:</strong> Evita compras innecesarias. <br />
-        🎯 <strong>Planificación:</strong> No te endeudes demasiado.
-      </Container>
-    );
-  }
+  // 🔹 Primer mensaje: El perfil financiero del usuario
+  const firstMessage: React.ReactNode = (
+    <Box textAlign="center">{mensajeArturo}</Box>
+  );
+
+  // 🔹 Segundo mensaje: Explicación de cómo seguir
+  const secondMessage: React.ReactNode = (
+    <Box textAlign="center">
+      <Typography variant="h6" fontWeight="bold">
+        ¿Y ahora qué sigue? 🤔
+      </Typography>
+      <Typography variant="body1" sx={{ marginTop: "8px", fontSize: "15px" }}>
+        Ahora es momento de <strong>registrar cada uno de tus gastos</strong> en
+        las categorías que definimos.
+      </Typography>
+      <Typography variant="body1" sx={{ marginTop: "8px" }}>
+        Al final de cada mes, <strong>recibirás un informe detallado</strong> en
+        tu correo 📩 con un resumen de cómo administraste tu dinero, las
+        categorías más gastadas y sugerencias para mejorar. 📊✨
+      </Typography>
+      <Typography
+        variant="body1"
+        sx={{ marginTop: "12px", fontWeight: "bold" }}
+      >
+        ¡Empieza a registrar tus gastos y toma el control de tus finanzas! 🚀
+      </Typography>
+    </Box>
+  );
+
   return (
     <Box
       sx={{
@@ -68,16 +85,24 @@ const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
         </Typography>
       </Box>
 
-      <ChatBubble
-        text={arturoMessage}
-        buttonText={!showAdvice ? "¿Quieres un consejo?" : "Cerrar consejo"}
-        onButtonClick={() => {
-          if (showAdvice) setAdviceClosed(true);
-          setShowAdvice(!showAdvice);
-        }}
-      />
+      {/* Burbuja de Arturo con dos mensajes diferentes */}
+      {showBubble && (
+        <ChatBubble
+          text={step === 1 ? firstMessage : secondMessage}
+          buttonText={step === 1 ? "Siguiente" : "Salir"}
+          onButtonClick={() => {
+            if (step === 1) {
+              setStep(2); // Avanzamos al segundo mensaje
+            } else {
+              setShowBubble(false); // Ocultamos la burbuja al finalizar
+            }
+          }}
+          isVisible={true}
+        />
+      )}
 
-      {adviceClosed && (
+      {/* Botón de Finalizar solo aparece cuando la burbuja desaparece */}
+      {!showBubble && (
         <Button
           variant="contained"
           color="primary"

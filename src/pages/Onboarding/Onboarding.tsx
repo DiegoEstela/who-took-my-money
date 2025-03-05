@@ -15,6 +15,7 @@ import { db } from "../../db/firebase";
 import { useNotification } from "../../context/useNotification";
 
 type OnboardingFormData = {
+  currency: string;
   name: string;
   salary?: number;
   fixedExpenses?: Record<string, number>;
@@ -36,6 +37,7 @@ const Onboarding = () => {
 
   const methods = useForm<OnboardingFormData>({
     defaultValues: {
+      currency: "USD",
       name: "",
       salary: undefined,
       fixedExpenses: {},
@@ -43,8 +45,8 @@ const Onboarding = () => {
     },
   });
 
-  const { getValues, setValue, handleSubmit } = methods;
-
+  const { getValues, setValue, handleSubmit, watch } = methods;
+  console.log(getValues());
   if (loading || checkingUser) return <Loading />;
 
   const handleNext = () => {
@@ -105,6 +107,7 @@ const Onboarding = () => {
               }
               getValues={getValues}
               handleSaveToDB={() => handleSubmit(handleSaveToDB)()}
+              watch={watch}
             />
           )}
         </Box>

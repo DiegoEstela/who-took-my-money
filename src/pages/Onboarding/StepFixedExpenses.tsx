@@ -1,21 +1,16 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  IconButton,
-  useTheme,
-} from "@mui/material";
+import { Box, TextField, Button, IconButton } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
-import ChatBubble from "../../components/ChatBubble";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
+import ChatBubbleBlock from "../../components/ChatBubbleBlock";
+import { handleAmountBlur, handleAmountChange } from "../../utils/formatUtils";
 
 interface StepFixedExpensesProps {
   onNext: () => void;
   onBack: () => void;
   setValue: (name: string, value: any) => void;
   getValues: () => any;
+  watch: (field: string) => void;
 }
 
 const StepFixedExpenses = ({
@@ -23,54 +18,46 @@ const StepFixedExpenses = ({
   onBack,
   setValue,
   getValues,
+  watch,
 }: StepFixedExpensesProps) => {
-  const theme = useTheme();
   const [fixedExpenses, setFixedExpenses] = useState<Record<string, number>>(
     {}
   );
-  const [errors, setErrors] = useState<Record<string, boolean>>({}); // 🔹 Errores de validación
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const currency = watch("currency");
 
   useEffect(() => {
-    // Obtener los gastos guardados en React Hook Form al montar el componente
     const existingExpenses = { ...getValues().fixedExpenses };
-    delete existingExpenses.totalExpenses; // 🔹 Evita que `totalExpenses` se multiplique
-
+    delete existingExpenses.totalExpenses;
     setFixedExpenses(existingExpenses);
-  }, []); // 🔹 Se ejecuta solo al montar el componente
+  }, []);
 
-  // Calcular la suma total de gastos fijos
-  const totalExpenses = Object.values(fixedExpenses).reduce(
-    (sum, amount) => sum + amount,
-    0
-  );
+  const totalExpenses = Object.values(fixedExpenses)
+    .map((amount) => parseFloat(amount as any) || 0) // 🔹 Asegura que todos los valores sean numéricos
+    .reduce((sum, amount) => sum + amount, 0);
 
-  // Validar si todos los campos están completos
   const isFormValid = Object.entries(fixedExpenses).every(
     ([name, amount]) => name.trim() !== "" && amount > 0
   );
 
-  // Mensaje dinámico de Arturo
   let arturoMessage =
     "¡Dime cuáles son tus gastos fijos! No te preocupes, no le diré a nadie.";
   if (totalExpenses > 0) {
-    arturoMessage = `Tus gastos fijos son: $${totalExpenses.toLocaleString(
+    arturoMessage = `Tus gastos fijos suman: ${currency} ${totalExpenses.toLocaleString(
       "es-ES"
-    )}. Bueno, con esto ya tenemos una idea de cómo está la cosa 💰.`;
+    )}`;
   }
   if (Object.keys(fixedExpenses).length > 3) {
-    arturoMessage = `¡Guau, cuántos gastos! Vamos a tener que trabajar duro para cubrir todo esto🔥. Gastos: $${totalExpenses.toLocaleString(
+    arturoMessage = `¡Guau, cuántos gastos! Vamos a trabajar duro para cubrir todo esto🔥. Total:  ${currency} ${totalExpenses.toLocaleString(
       "es-ES"
     )}`;
   }
 
-  // Agregar un nuevo gasto vacío con validación
   const addExpense = () => {
-    if (fixedExpenses["Nuevo Gasto"] !== undefined) return; // Evitar agregar duplicados
     setFixedExpenses({ ...fixedExpenses, "": 0 });
-    setErrors({ ...errors, "Nuevo Gasto": true }); // 🔹 Marcar error en el nuevo campo
+    setErrors({ ...errors, "": true });
   };
 
-  // Eliminar un gasto
   const removeExpense = (key: string) => {
     const updatedExpenses = { ...fixedExpenses };
     delete updatedExpenses[key];
@@ -78,10 +65,9 @@ const StepFixedExpenses = ({
 
     const updatedErrors = { ...errors };
     delete updatedErrors[key];
-    setErrors(updatedErrors); // 🔹 Eliminar errores asociados
+    setErrors(updatedErrors);
   };
 
-  // Manejar cambios en los inputs
   const handleInputChange = (
     key: string,
     field: "name" | "amount",
@@ -91,32 +77,36 @@ const StepFixedExpenses = ({
       let updatedExpenses = { ...prev };
 
       if (field === "amount") {
-        const amount = Number(value.replace(/\D/g, "")) || 0;
-        updatedExpenses[key] = amount;
-        setErrors((prevErrors) => ({ ...prevErrors, [key]: amount <= 0 }));
+        // Permitir solo números y un solo punto decimal
+        const amount = value.replace(/[^0-9.]/g, "");
+        const validAmount =
+          amount.split(".").length > 2 ? amount.slice(0, -1) : amount;
+        updatedExpenses[key] = validAmount ? parseFloat(validAmount) : 0;
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [key]: updatedExpenses[key] <= 0,
+        }));
       } else {
-        const newKey = value.trim();
-        if (newKey && newKey !== key) {
-          updatedExpenses[newKey] = updatedExpenses[key]; // Copiar el monto al nuevo nombre
-          delete updatedExpenses[key]; // Eliminar la clave antigua
+        // Permitir solo letras y espacios en el concepto
+        const newKey = value.replace(/[0-9]/g, "");
 
-          setErrors((prevErrors) => {
-            const updatedErrors = { ...prevErrors };
-            delete updatedErrors[key]; // Quitar el error de la clave antigua
-            updatedErrors[newKey] = newKey === ""; // Marcar error si está vacío
-            return updatedErrors;
-          });
+        if (newKey !== key) {
+          updatedExpenses[newKey] = updatedExpenses[key] || 0;
+          delete updatedExpenses[key];
         }
+
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [newKey]: newKey.trim() === "",
+        }));
       }
 
       return updatedExpenses;
     });
   };
 
-  // Guardar los datos antes de avanzar
   const handleNext = () => {
     if (!isFormValid) {
-      // 🔹 Marcar errores si hay campos vacíos
       const updatedErrors: Record<string, boolean> = {};
       Object.entries(fixedExpenses).forEach(([name, amount]) => {
         updatedErrors[name] = name.trim() === "" || amount <= 0;
@@ -125,10 +115,11 @@ const StepFixedExpenses = ({
       return;
     }
 
-    // Guardar el total correctamente evitando acumulaciones previas
-    const updatedExpenses = { ...fixedExpenses, totalExpenses };
-    setValue("fixedExpenses", updatedExpenses); // Guardamos en React Hook Form
-    console.log("Fixed Expenses guardados:", updatedExpenses);
+    setValue("fixedExpenses", { ...fixedExpenses, totalExpenses });
+    console.log("Fixed Expenses guardados:", {
+      ...fixedExpenses,
+      totalExpenses,
+    });
     onNext();
   };
 
@@ -137,18 +128,27 @@ const StepFixedExpenses = ({
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 2,
         alignItems: "center",
+        width: "100%",
+        position: "relative",
+        paddingTop: "30px", // 🔹 Agrega espacio para que Arturo no tape otros elementos
       }}
     >
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        color={theme.palette.customColors.black}
-      >
-        Gastos Fijos 💸
-      </Typography>
-
+      <ChatBubbleBlock
+        text={arturoMessage}
+        arturoSize={30}
+        imagePosition="left"
+        fontSize={14}
+        sx={{
+          position: "absolute",
+          top: "-50px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "90%",
+          maxWidth: "340px",
+        }}
+      />
+      {/* Contenedor de los gastos fijos */}
       <Box
         sx={{
           maxHeight: "35vh",
@@ -166,8 +166,8 @@ const StepFixedExpenses = ({
           },
         }}
       >
-        {Object.entries(fixedExpenses).map(([key, amount], index) =>
-          key !== "totalExpenses" ? ( // No mostrar totalExpenses en los inputs
+        {Object.entries(fixedExpenses).map(([key], index) =>
+          key !== "totalExpenses" ? (
             <Box
               key={index}
               sx={{
@@ -185,19 +185,27 @@ const StepFixedExpenses = ({
                 onChange={(e) => handleInputChange(key, "name", e.target.value)}
                 size="small"
                 error={!!errors[key]}
-                helperText={errors[key] ? "Este campo es obligatorio" : ""}
+                helperText={errors[key] ? "Campo obligatorio" : ""}
               />
               <TextField
                 label="Monto"
                 variant="outlined"
                 type="text"
-                value={amount ? amount.toLocaleString("es-ES") : ""}
+                value={fixedExpenses[key]?.toString() || ""}
                 onChange={(e) =>
-                  handleInputChange(key, "amount", e.target.value)
+                  handleAmountChange(
+                    key,
+                    e.target.value,
+                    setFixedExpenses,
+                    setErrors
+                  )
+                }
+                onBlur={(e) =>
+                  handleAmountBlur(key, e.target.value, setFixedExpenses)
                 }
                 size="small"
                 error={!!errors[key]}
-                helperText={errors[key] ? "Debe ser mayor a 0" : ""}
+                helperText={errors[key] ? "Menor a 0" : ""}
               />
               <IconButton onClick={() => removeExpense(key)} color="error">
                 <Delete />
@@ -207,24 +215,23 @@ const StepFixedExpenses = ({
         )}
       </Box>
 
-      {/* Botón para agregar más gastos */}
-      <Button
-        variant="outlined"
-        startIcon={<Add />}
-        onClick={addExpense}
-        size="small"
-      >
-        Agregar Gasto
-      </Button>
+      {/* Botón de agregar gasto centrado */}
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        <Button
+          variant="outlined"
+          startIcon={<Add />}
+          onClick={addExpense}
+          size="small"
+        >
+          Agregar Gasto
+        </Button>
+      </Box>
 
       <StepNavigationBtn
         onBack={onBack}
         onNext={handleNext}
         disabled={!isFormValid}
       />
-
-      {/* Chat de Arturo con el mensaje dinámico */}
-      <ChatBubble text={arturoMessage} />
     </Box>
   );
 };

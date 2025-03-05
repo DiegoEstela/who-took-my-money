@@ -7,46 +7,72 @@ interface ChatBubbleProps {
   text: string | React.ReactNode; // 🔹 Permite string o JSX
   buttonText?: string;
   onButtonClick?: () => void;
+  isVisible: boolean; // 🔹 Controla si la burbuja aparece con overlay
 }
 
-const ChatBubble = ({ text, buttonText, onButtonClick }: ChatBubbleProps) => {
+const ChatBubble = ({
+  text,
+  buttonText,
+  onButtonClick,
+  isVisible,
+}: ChatBubbleProps) => {
   const theme = useTheme();
 
+  if (!isVisible) return null; // 🔹 No renderiza si isVisible es false
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }} // Comienza completamente transparente
-      animate={{ opacity: 1 }} // Se hace visible gradualmente
-      transition={{ duration: 0.6, ease: "easeOut" }} // Transición suave
-    >
-      <Box sx={styles.chatBubble(theme)}>
-        <Box component="img" src={arturoImg} alt="Arturo" sx={styles.image} />
+    <Box sx={styles.overlay}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <Box sx={styles.chatBubble(theme)}>
+          <Box component="img" src={arturoImg} alt="Arturo" sx={styles.image} />
 
-        <Box sx={styles.textContainer}>
-          {typeof text === "string" ? (
-            <Typography variant="body1" textAlign="center">
-              {text}
-            </Typography>
-          ) : (
-            <Typography variant="body1" textAlign="left" component="div">
-              {text}
-            </Typography>
-          )}
+          <Box sx={styles.textContainer}>
+            {typeof text === "string" ? (
+              <Typography variant="body1" textAlign="center">
+                {text}
+              </Typography>
+            ) : (
+              <Typography variant="body1" textAlign="left" component="div">
+                {text}
+              </Typography>
+            )}
 
-          {buttonText && onButtonClick && (
-            <Button variant="contained" onClick={onButtonClick} sx={{ mt: 2 }}>
-              {buttonText}
-            </Button>
-          )}
+            {buttonText && onButtonClick && (
+              <Button
+                variant="contained"
+                onClick={onButtonClick}
+                sx={{ mt: 2 }}
+              >
+                {buttonText}
+              </Button>
+            )}
+          </Box>
         </Box>
-      </Box>
-    </motion.div>
+      </motion.div>
+    </Box>
   );
 };
 
 const styles = {
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // 🔹 Oscurece el fondo
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999, // 🔹 Justo por debajo de la burbuja
+  },
   chatBubble: (theme: any) => ({
     position: "fixed",
-    bottom: "40px",
+    top: "40px",
     left: "50%",
     transform: "translateX(-50%)",
     display: "flex",
