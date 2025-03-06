@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
 import ChatBubble from "../../components/ChatBubble"; // Nueva burbuja temporal
 import ChatBubbleBlock from "../../components/ChatBubbleBlock";
