@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   TablePagination,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
@@ -43,6 +42,7 @@ export default function ExpenseHistory() {
   );
 
   const handleChangePage = (event: any, newPage: any) => {
+    console.log(event);
     setPage(newPage);
   };
 
