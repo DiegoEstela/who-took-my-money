@@ -22,27 +22,23 @@ import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
 import BlockIcon from "@mui/icons-material/Block";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
+
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import CloseIcon from "@mui/icons-material/Close";
 import { signOut } from "firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "../services/fetchUserProfile";
 import { auth } from "../db/firebase";
+import { PAGES_TITLES } from "../utils/const";
 
-const pageTitles: any = {
-  "/": "INICIO",
-  "/expenseEntry": "AGREGAR GASTOS",
-  "/profile": "PERFIL",
-  "/reports": "REPORTES",
-  "/settings": "CONFIGURACIÓN",
-};
+// Diccionario de títulos de página
 
 const Navbar = () => {
   const theme = useTheme();
   const [openSidebar, setOpenSidebar] = useState(false);
-  const userId = auth.currentUser?.uid;
   const navigate = useNavigate();
   const location = useLocation();
+  const userId = auth.currentUser?.uid;
 
   const { data, isLoading } = useQuery({
     queryKey: ["userProfileData", userId],
@@ -52,28 +48,28 @@ const Navbar = () => {
 
   const userName = data?.name || "";
   const avatarInitial = userName ? userName.charAt(0).toUpperCase() : "U";
-  const pageTitle = pageTitles[location.pathname] || "";
+  const pageTitle = PAGES_TITLES[location.pathname] || "";
 
-  const toggleSidebar = () => {
-    setOpenSidebar(!openSidebar);
+  const toggleSidebar = () => setOpenSidebar((prev) => !prev);
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setOpenSidebar(false); // 🔹 Cierra el sidebar al navegar
   };
 
   const handleLogout = async () => {
     await signOut(auth);
+    setOpenSidebar(false); // 🔹 Cierra el sidebar al cerrar sesión
   };
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        sx={{ backgroundColor: "#1976D2", width: "100%", zIndex: 1201 }}
-      >
+      <AppBar position="fixed" sx={{ backgroundColor: "#1976D2", zIndex: 900 }}>
         <Toolbar
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            paddingLeft: "40px",
           }}
         >
           <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
@@ -85,7 +81,6 @@ const Navbar = () => {
             sx={{
               flexGrow: 1,
               textAlign: "center",
-              paddingTop: "3px",
               fontWeight: "bold",
               letterSpacing: 1.5,
               fontSize: "14px",
@@ -96,7 +91,7 @@ const Navbar = () => {
 
           <IconButton
             onClick={() =>
-              location.pathname === "/" ? navigate("/profile") : navigate("/")
+              handleNavigation(location.pathname === "/" ? "/profile" : "/")
             }
           >
             {isLoading ? (
@@ -128,15 +123,17 @@ const Navbar = () => {
 
           <List sx={{ flexGrow: 1, paddingTop: 2 }}>
             <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/expenseEntry")}>
+              <ListItemButton onClick={() => handleNavigation("/expenseEntry")}>
                 <AddIcon sx={{ marginRight: 1, color: "#1976D2" }} />
                 <ListItemText primary="Agregar Gastos" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-              <ListItemButton>
-                <EditIcon sx={{ marginRight: 1, color: "#4CAF50" }} />
-                <ListItemText primary="Editar Gastos Fijos" />
+              <ListItemButton
+                onClick={() => handleNavigation("/expenseHistory")}
+              >
+                <ReceiptLongIcon sx={{ marginRight: 1, color: "#4CAF50" }} />
+                <ListItemText primary="Listado de gastos" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>

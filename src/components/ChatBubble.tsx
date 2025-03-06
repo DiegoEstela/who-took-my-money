@@ -72,7 +72,7 @@ const styles = {
   },
   chatBubble: (theme: any) => ({
     position: "fixed",
-    top: "15vh",
+    top: "2vh",
     left: "50%",
     transform: "translateX(-50%)",
     display: "flex",
@@ -82,7 +82,7 @@ const styles = {
     padding: "20px",
     borderRadius: "16px",
     boxShadow: "2px 4px 10px rgba(0, 0, 0, 0.3)",
-    zIndex: 1000,
+    zIndex: 2000,
     color: theme.palette.text.primary,
     minWidth: "80vw",
     textAlign: "center",

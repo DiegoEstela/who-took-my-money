@@ -12,6 +12,7 @@ import {
 import { useFormContext } from "react-hook-form";
 import ChatBubble from "../../components/ChatBubble";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
+import { getArturoTexts } from "../../utils/arturoTexts";
 
 interface StepSalaryProps {
   onNext: () => void;
@@ -25,6 +26,7 @@ const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
   const salary = watch("salary", "");
   const currency = watch("currency", "USD"); // Valor por defecto
   const name = watch("name", "");
+  const ARTURO_TEXT = getArturoTexts(name);
 
   const [showBubble, setShowBubble] = useState(true);
 
@@ -71,7 +73,7 @@ const StepSalary = ({ onNext, onBack, setValue }: StepSalaryProps) => {
       }}
     >
       <ChatBubble
-        text={`Eh...${name}, esto es un poco incómodo , pero... ¿me podrías decir cuál es tu sueldo mensual y en qué moneda lo manejas? Es importante para que puedas aprovechar al máximo la app. ¡Palabra de Arturo! 💰🤫`}
+        text={ARTURO_TEXT.ONBOARDING.STEP2}
         onButtonClick={() => setShowBubble(false)}
         isVisible={showBubble}
       />

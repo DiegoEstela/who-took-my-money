@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Box, Typography, Button, useTheme } from "@mui/material";
 import ChatBubble from "../../components/ChatBubble";
 import useFinancialProfile from "../../hooks/useFinancialProfile";
+import { getArturoTexts } from "../../utils/arturoTexts";
 
 interface StepFinishProps {
   onBack: () => void;
@@ -10,11 +11,13 @@ interface StepFinishProps {
 }
 
 const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
+  const ARTURO_TEXT = getArturoTexts();
   const theme = useTheme();
   const [step, setStep] = useState(1);
   const [showBubble, setShowBubble] = useState(true);
 
   const salary = getValues().salary || 0;
+  const currency = getValues().currency || "";
   const fixedExpenses = getValues().fixedExpenses || {};
   const variableExpenses = getValues().variableExpenses || {};
   const { mensajeArturo } = useFinancialProfile(variableExpenses);
@@ -28,30 +31,6 @@ const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
   // 🔹 Primer mensaje: El perfil financiero del usuario
   const firstMessage: React.ReactNode = (
     <Box textAlign="center">{mensajeArturo}</Box>
-  );
-
-  // 🔹 Segundo mensaje: Explicación de cómo seguir
-  const secondMessage: React.ReactNode = (
-    <Box textAlign="center">
-      <Typography variant="h6" fontWeight="bold">
-        ¿Y ahora qué sigue? 🤔
-      </Typography>
-      <Typography variant="body1" sx={{ marginTop: "8px", fontSize: "15px" }}>
-        Ahora es momento de <strong>registrar cada uno de tus gastos</strong> en
-        las categorías que definimos.
-      </Typography>
-      <Typography variant="body1" sx={{ marginTop: "8px" }}>
-        Al final de cada mes, <strong>recibirás un informe detallado</strong> en
-        tu correo 📩 con un resumen de cómo administraste tu dinero, las
-        categorías más gastadas y sugerencias para mejorar. 📊✨
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{ marginTop: "12px", fontWeight: "bold" }}
-      >
-        ¡Empieza a registrar tus gastos y toma el control de tus finanzas! 🚀
-      </Typography>
-    </Box>
   );
 
   return (
@@ -73,13 +52,15 @@ const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
 
       <Box sx={{ textAlign: "left", width: "100%", maxWidth: "400px" }}>
         <Typography variant="body1" color={theme.palette.customColors.black}>
-          <b>💰 Ingresos:</b> ${salary.toLocaleString("es-ES")}
+          <b>💰 Ingresos:</b> {currency} {salary.toLocaleString("es-ES")}
         </Typography>
         <Typography variant="body1" color={theme.palette.customColors.black}>
-          <b>📌 Gastos Fijos:</b> ${totalFixedExpenses.toLocaleString("es-ES")}
+          <b>📌 Gastos Fijos:</b> {currency}{" "}
+          {totalFixedExpenses.toLocaleString("es-ES")}
         </Typography>
         <Typography variant="body1" color={theme.palette.customColors.black}>
-          <b>🎯 Gastos Variables:</b> $
+          <b>🎯 Gastos Variables:</b>
+          {currency}
           {totalVariableExpenses.toLocaleString("es-ES")}
         </Typography>
       </Box>
@@ -87,7 +68,7 @@ const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
       {/* Burbuja de Arturo con dos mensajes diferentes */}
       {showBubble && (
         <ChatBubble
-          text={step === 1 ? firstMessage : secondMessage}
+          text={step === 1 ? firstMessage : ARTURO_TEXT.ONBOARDING.STEP6}
           buttonText={step === 1 ? "Siguiente" : "Salir"}
           onButtonClick={() => {
             if (step === 1) {

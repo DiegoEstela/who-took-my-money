@@ -3,6 +3,7 @@ import { Box, TextField, Typography } from "@mui/material";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
 import ChatBubble from "../../components/ChatBubble"; // Nueva burbuja temporal
 import ChatBubbleBlock from "../../components/ChatBubbleBlock";
+import { getArturoTexts } from "../../utils/arturoTexts";
 
 interface StepCompletionProps {
   onNext: () => void;
@@ -47,75 +48,18 @@ const StepCompletion = ({
   // Calcular el porcentaje restante y el dinero restante a repartir
   const remainingPercentage = 100 - totalPercentage;
   const remainingAmount = (remainingPercentage * availableAmount) / 100;
-  const initialArturoMessage = (
-    <Box>
-      <Box textAlign="center">
-        <Typography variant="h6" fontWeight="bold">
-          ¡Último paso! 🎯
-        </Typography>
-        <Typography variant="body1" sx={{ marginTop: "8px", fontSize: "16px" }}>
-          Ahora asignarás porcentajes a tus <strong>gastos variables</strong>.
-        </Typography>
-        <Typography variant="body1" sx={{ marginTop: "8px", fontSize: "14px" }}>
-          Esto te ayudará a <strong>tener un plan claro</strong> sobre cómo usar
-          tu dinero. 💡💰
-        </Typography>
-      </Box>
-      <Typography variant="body1" sx={{ marginTop: "3px", fontWeight: "bold" }}>
-        Te sugerimos esta distribución:
-      </Typography>
-      <ul
-        style={{
-          paddingLeft: "20px",
-          textAlign: "left",
-          display: "inline-block",
-          fontSize: "14px",
-        }}
-      >
-        <li>
-          📌 <strong>Ahorro:</strong> 20%
-        </li>
-        <li>
-          📌 <strong>Comida:</strong> 30%
-        </li>
-        <li>
-          📌 <strong>Ocio:</strong> 15%
-        </li>
-        <li>
-          📌 <strong>Compras:</strong> 10%
-        </li>
-        <li>
-          📌 <strong>Viajes:</strong> 15%
-        </li>
-        <li>
-          📌 <strong>Otros:</strong> 10% (Para lo que no encaje en las demás
-          categorías)
-        </li>
-      </ul>
-
-      <Typography variant="body1" textAlign="center" fontSize="14px">
-        Recuerda que <strong>‘Otros’</strong> te permite personalizar aún más tu
-        presupuesto. ¡Vamos a organizarnos mejor! 🚀
-      </Typography>
-    </Box>
+  const ARTURO_TEXT = getArturoTexts(
+    "",
+    0,
+    {},
+    currency,
+    remainingAmount,
+    remainingPercentage,
+    totalPercentage,
+    availableAmount
   );
 
   // 📝 **Mensaje Dinámico de Arturo en `ChatBubbleBlock`**
-  let arturoMessage = `Después de pagar tus gastos fijos de ${currency} ${totalExpenses.toLocaleString(
-    "es-ES"
-  )}, tienes ${currency} ${availableAmount.toLocaleString(
-    "es-ES"
-  )} para repartir en gastos variables.`;
-
-  if (totalPercentage > 100) {
-    arturoMessage = `¡Cuidado! Estás asignando más del 100% de tu dinero disponible! 🫣`;
-  } else if (totalPercentage < 100) {
-    arturoMessage = `Te falta asignar ${remainingPercentage}% de ${currency} ${remainingAmount.toLocaleString(
-      "es-ES"
-    )}📊 ¡Sigue ajustando!`;
-  } else {
-    arturoMessage = `¡Perfecto! Has asignado el 100% de tu dinero disponible.`;
-  }
 
   // Manejar cambios en los inputs
   const handleInputChange = (category: string, value: string) => {
@@ -123,7 +67,9 @@ const StepCompletion = ({
 
     if (newPercentage > 99) newPercentage = 99; // Evitar más del 99% en una sola categoría
 
-    const newAmount = (newPercentage * availableAmount) / 100;
+    const newAmount = Number(
+      ((newPercentage * availableAmount) / 100).toFixed(2)
+    ); // 🔹 Mantiene solo dos decimales
 
     setVariableExpenses((prev) => ({
       ...prev,
@@ -134,7 +80,6 @@ const StepCompletion = ({
   // Guardar los datos antes de avanzar
   const handleNext = () => {
     setValue("variableExpenses", variableExpenses); // Guardar en React Hook Form
-    console.log("Gastos variables guardados:", getValues().variableExpenses);
     onNext();
   };
 
@@ -152,14 +97,14 @@ const StepCompletion = ({
       {/* Mostrar Burbuja Temporal Solo los Primeros 4 Segundos */}
       {showBubble ? (
         <ChatBubble
-          text={initialArturoMessage}
+          text={ARTURO_TEXT.ONBOARDING.STEP4}
           isVisible={showBubble}
           buttonText="Gracias"
           onButtonClick={() => setShowBubble(false)}
         />
       ) : (
         <ChatBubbleBlock
-          text={arturoMessage}
+          text={ARTURO_TEXT.ONBOARDING.STEP5}
           arturoSize={30}
           imagePosition="left"
           fontSize={14}

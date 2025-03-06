@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import {
   Box,
   Typography,
@@ -6,24 +5,13 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { auth } from "../../db/firebase";
-import { fetchUserProfile } from "./../../services/fetchUserProfile";
+import useUserProfile from "../../hooks/useUserProfile";
+import { CURRENCY_SYMBOLS } from "../../utils/const";
 
 const Profile = () => {
-  const user = auth.currentUser;
-  const userId = user?.uid || "";
+  const { userData, isLoading, error, isSuccess } = useUserProfile();
 
-  const {
-    data: userData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["userProfile", userId],
-    queryFn: () => fetchUserProfile(userId),
-    enabled: !!userId,
-  });
-
-  if (isLoading) {
+  if (isLoading || !userData) {
     return (
       <Box
         display="flex"
@@ -45,14 +33,15 @@ const Profile = () => {
       </Box>
     );
   }
-
+  if (isSuccess) {
+  }
   return (
     <Box p={3} maxWidth="80vw" minWidth="70vw" margin="auto">
       {/* 🔹 Contenedor Principal */}
       <Paper elevation={3} sx={{ padding: 3, marginTop: 2 }}>
         {/* 🔹 Ingresos */}
         <Typography variant="h6" gutterBottom>
-          💰 <strong>Ingresos:</strong> {userData.currency}{" "}
+          💰 <strong>Ingresos:</strong> {CURRENCY_SYMBOLS[userData.currency]}
           {userData.salary.toLocaleString("es-ES")}
         </Typography>
 
@@ -82,7 +71,7 @@ const Profile = () => {
                   paddingLeft: "10px", // 🔹 Pequeño margen para separar
                 }}
               >
-                <strong>{key}:</strong> {userData.currency}{" "}
+                <strong>{key}:</strong> {CURRENCY_SYMBOLS[userData.currency]}
                 {parseFloat(value).toLocaleString("es-ES")}
               </Typography>
             ))}
@@ -113,7 +102,8 @@ const Profile = () => {
                   paddingLeft: "10px", // 🔹 Pequeño margen para separar
                 }}
               >
-                <strong>{key}:</strong> {data.percentage}% → {userData.currency}{" "}
+                <strong>{key}:</strong> {data.percentage}% →
+                {CURRENCY_SYMBOLS[userData.currency]}
                 {data.amount.toLocaleString("es-ES")}
               </Typography>
             )
@@ -123,7 +113,7 @@ const Profile = () => {
         <Divider sx={{ marginY: 2 }} />
 
         <Typography variant="h6">
-          📊 <strong>Ahorro:</strong> {userData.currency}{" "}
+          📊 <strong>Ahorro:</strong> {CURRENCY_SYMBOLS[userData.currency]}
           {userData.variableExpenses.Ahorro.amount.toFixed(2)}
         </Typography>
       </Paper>

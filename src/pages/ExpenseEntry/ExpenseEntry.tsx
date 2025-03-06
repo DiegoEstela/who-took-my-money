@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, TextField, Grid, Typography, Box } from "@mui/material";
 import { Save } from "@mui/icons-material";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -8,20 +8,12 @@ import { saveExpenseToDB } from "../../services/saveExpense";
 import useCheckUser from "../../hooks/useCheckUser";
 import { fetchUserData } from "../../services/fetchUserData";
 import useBudgetAnalysis from "../../hooks/useBudgetAnalysis";
-import ChatBubble from "./../../components/ChatBubble";
-
-const categories = [
-  { id: "Ahorro", label: "Ahorro", icon: "💰" },
-  { id: "Comida", label: "Comida", icon: "🍔" },
-  { id: "Ocio", label: "Ocio", icon: "🎮" },
-  { id: "Compras", label: "Compras", icon: "🛋️" },
-  { id: "Viajes", label: "Viajes", icon: "✈️" },
-  { id: "Otros", label: "Otros", icon: "🔹" },
-];
+import useUserProfile from "../../hooks/useUserProfile";
+import { CATEGORIES_MAP, CURRENCY_SYMBOLS } from "../../utils/const";
 
 export default function ExpenseEntry() {
-  const [showBubble, setShowBubble] = useState<boolean>(true);
   const { user } = useCheckUser();
+  const { currency } = useUserProfile();
   const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: { amount: "", description: "" },
   });
@@ -35,9 +27,10 @@ export default function ExpenseEntry() {
     enabled: !!user?.uid,
   });
 
-  const { warning, inputWarning, checkAmountExceeds } = useBudgetAnalysis(
+  const { inputWarning, checkAmountExceeds } = useBudgetAnalysis(
     data?.variableExpenses || {},
-    data?.realExpenses || {}
+    data?.realExpenses || {},
+    currency
   );
 
   const remainingBudget = selectedCategory
@@ -76,11 +69,6 @@ export default function ExpenseEntry() {
   const description = watch("description");
   const isFormValid = selectedCategory && amount && description;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowBubble(false), 4000); // Desaparece en 4 segundos
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <Box
       display="flex"
@@ -89,33 +77,25 @@ export default function ExpenseEntry() {
       height="80vh"
       p={4}
     >
-      <ChatBubble
-        text={warning}
-        onButtonClick={() => setShowBubble(false)}
-        isVisible={showBubble}
-      />
-
-      {selectedCategory && (
-        <Typography
-          variant="body1"
-          color="primary"
-          fontWeight="bold"
-          gutterBottom
-        >
-          {selectedCategory
-            ? `Saldo restante en ${selectedCategory}: ${remainingBudget.toFixed(
-                2
-              )}`
-            : ""}
-        </Typography>
-      )}
+      <Typography
+        variant="body1"
+        color="primary"
+        fontWeight="bold"
+        gutterBottom
+      >
+        {selectedCategory
+          ? `Saldo restante en ${selectedCategory}: ${
+              CURRENCY_SYMBOLS[currency]
+            }${remainingBudget.toFixed(2)}`
+          : "Elije un concepto"}
+      </Typography>
 
       <form
         onSubmit={handleSubmit(onSubmit as any)}
         style={{ width: "100%", maxWidth: 400, textAlign: "center" }}
       >
         <Grid container spacing={2} justifyContent="center">
-          {categories.map((cat) => (
+          {CATEGORIES_MAP.map((cat) => (
             <Grid item xs={6} key={cat.id}>
               <Button
                 variant={selectedCategory === cat.id ? "contained" : "outlined"}
@@ -142,7 +122,9 @@ export default function ExpenseEntry() {
                 fullWidth
                 label="Monto"
                 variant="outlined"
-                InputProps={{ startAdornment: "$" }}
+                InputProps={{
+                  startAdornment: `${CURRENCY_SYMBOLS[currency]}`,
+                }}
                 type="number"
                 size="small"
                 onChange={(e) => {

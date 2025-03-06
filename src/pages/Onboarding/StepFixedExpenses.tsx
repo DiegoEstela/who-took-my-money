@@ -4,6 +4,7 @@ import { Add, Delete } from "@mui/icons-material";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
 import ChatBubbleBlock from "../../components/ChatBubbleBlock";
 import { handleAmountBlur, handleAmountChange } from "../../utils/formatUtils";
+import { getArturoTexts } from "../../utils/arturoTexts";
 
 interface StepFixedExpensesProps {
   onNext: () => void;
@@ -24,7 +25,7 @@ const StepFixedExpenses = ({
     {}
   );
   const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const currency = watch("currency");
+  const currency: string = watch("currency") ?? "";
 
   useEffect(() => {
     const existingExpenses = { ...getValues().fixedExpenses };
@@ -39,22 +40,15 @@ const StepFixedExpenses = ({
   const isFormValid = Object.entries(fixedExpenses).every(
     ([name, amount]) => name.trim() !== "" && amount > 0
   );
-
-  let arturoMessage =
-    "¡Dime cuáles son tus gastos fijos! No te preocupes, no le diré a nadie.";
-  if (totalExpenses > 0) {
-    arturoMessage = `Tus gastos fijos suman: ${currency} ${totalExpenses.toLocaleString(
-      "es-ES"
-    )}`;
-  }
-  if (Object.keys(fixedExpenses).length > 3) {
-    arturoMessage = `¡Guau, cuántos gastos! Vamos a trabajar duro para cubrir todo esto🔥. Total:  ${currency} ${totalExpenses.toLocaleString(
-      "es-ES"
-    )}`;
-  }
+  const ARTURO_TEXT = getArturoTexts(
+    "",
+    totalExpenses,
+    fixedExpenses,
+    currency
+  );
 
   const addExpense = () => {
-    setFixedExpenses({ ...fixedExpenses, "": 0 });
+    setFixedExpenses({ ...fixedExpenses, "": 0 }); //
     setErrors({ ...errors, "": true });
   };
 
@@ -81,7 +75,9 @@ const StepFixedExpenses = ({
         const amount = value.replace(/[^0-9.]/g, "");
         const validAmount =
           amount.split(".").length > 2 ? amount.slice(0, -1) : amount;
-        updatedExpenses[key] = validAmount ? parseFloat(validAmount) : 0;
+
+        updatedExpenses[key] = validAmount === "" ? 0 : parseFloat(validAmount);
+
         setErrors((prevErrors) => ({
           ...prevErrors,
           [key]: updatedExpenses[key] <= 0,
@@ -131,11 +127,11 @@ const StepFixedExpenses = ({
         alignItems: "center",
         width: "100%",
         position: "relative",
-        paddingTop: "30px", // 🔹 Agrega espacio para que Arturo no tape otros elementos
+        paddingTop: "30px",
       }}
     >
       <ChatBubbleBlock
-        text={arturoMessage}
+        text={ARTURO_TEXT.ONBOARDING.STEP3}
         arturoSize={30}
         imagePosition="left"
         fontSize={14}
@@ -191,7 +187,9 @@ const StepFixedExpenses = ({
                 label="Monto"
                 variant="outlined"
                 type="text"
-                value={fixedExpenses[key]?.toString() || ""}
+                value={
+                  fixedExpenses[key] === 0 ? "" : fixedExpenses[key].toString()
+                } // 🔹 Muestra "" en la UI si el valor es 0
                 onChange={(e) =>
                   handleAmountChange(
                     key,
@@ -207,6 +205,7 @@ const StepFixedExpenses = ({
                 error={!!errors[key]}
                 helperText={errors[key] ? "Menor a 0" : ""}
               />
+
               <IconButton onClick={() => removeExpense(key)} color="error">
                 <Delete />
               </IconButton>

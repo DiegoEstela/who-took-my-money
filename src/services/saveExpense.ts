@@ -1,4 +1,4 @@
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../db/firebase";
 
 export const saveExpenseToDB = async (
@@ -22,7 +22,7 @@ export const saveExpenseToDB = async (
       category: expense.category,
       amount: expense.amount,
       description: expense.description,
-      timestamp: serverTimestamp(),
+      date: Timestamp.now(), // ✅ Cambio a 'date' para que coincida con la consulta
     });
 
     showNotification("success", "¡Gasto agregado con éxito! 🎉");

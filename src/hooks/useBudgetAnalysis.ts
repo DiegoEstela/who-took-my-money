@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
+import { CURRENCY_SYMBOLS } from "../utils/const";
 
-const useBudgetAnalysis = (variableExpenses: any, realExpenses: any) => {
+const useBudgetAnalysis = (
+  variableExpenses: any,
+  realExpenses: any,
+  currency: string
+) => {
   const [warning, setWarning] = useState<string | null>(null);
   const [inputWarning, setInputWarning] = useState<any>(null);
   const today = new Date();
@@ -40,9 +45,9 @@ const useBudgetAnalysis = (variableExpenses: any, realExpenses: any) => {
       (variableExpenses[category]?.amount || 0) - (realExpenses[category] || 0);
     if (amount > remainingBudget) {
       setInputWarning(
-        `⚠️ ${category}: Te pasas por $${(amount - remainingBudget).toFixed(
-          2
-        )}.`
+        `⚠️ ${category}: Te pasas por ${`${CURRENCY_SYMBOLS[currency]} `}${(
+          amount - remainingBudget
+        ).toFixed(2)}.`
       );
     } else {
       setInputWarning(null);
