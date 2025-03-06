@@ -82,7 +82,13 @@ export default function ExpenseEntry() {
   }, []);
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" p={4}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      height="80vh"
+      p={4}
+    >
       <ChatBubble
         text={warning}
         onButtonClick={() => setShowBubble(false)}
@@ -161,7 +167,7 @@ export default function ExpenseEntry() {
           />
         </Box>
 
-        <Box mt={2}>
+        <Box mt={1}>
           <Controller
             name="description"
             control={control}
@@ -181,7 +187,7 @@ export default function ExpenseEntry() {
           />
         </Box>
 
-        <Box mt={3}>
+        <Box mt={2}>
           <Button
             type="submit"
             variant="contained"
