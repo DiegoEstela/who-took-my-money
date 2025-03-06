@@ -8,6 +8,7 @@ import Loading from "./components/Loading";
 import useCheckUser from "./hooks/useCheckUser";
 import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile/Profile";
+import ExpenseEntry from "./pages/ExpenseEntry/ExpenseEntry";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/expenseEntry" element={<ExpenseEntry />} />
             <Route
               path="/"
               element={

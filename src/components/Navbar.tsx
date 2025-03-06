@@ -18,23 +18,31 @@ import {
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
+import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
 import BlockIcon from "@mui/icons-material/Block";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import HomeIcon from "@mui/icons-material/Home"; // 🔹 Importamos el icono de Casa
 import { signOut } from "firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "../services/fetchUserProfile";
 import { auth } from "../db/firebase";
+
+const pageTitles: any = {
+  "/": "INICIO",
+  "/expenseEntry": "AGREGAR GASTOS",
+  "/profile": "PERFIL",
+  "/reports": "REPORTES",
+  "/settings": "CONFIGURACIÓN",
+};
 
 const Navbar = () => {
   const theme = useTheme();
   const [openSidebar, setOpenSidebar] = useState(false);
   const userId = auth.currentUser?.uid;
   const navigate = useNavigate();
-  const location = useLocation(); // 🔹 Obtener la ruta actual
+  const location = useLocation();
 
   const { data, isLoading } = useQuery({
     queryKey: ["userProfileData", userId],
@@ -44,6 +52,7 @@ const Navbar = () => {
 
   const userName = data?.name || "";
   const avatarInitial = userName ? userName.charAt(0).toUpperCase() : "U";
+  const pageTitle = pageTitles[location.pathname] || "";
 
   const toggleSidebar = () => {
     setOpenSidebar(!openSidebar);
@@ -55,35 +64,52 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Navbar fijo */}
       <AppBar
         position="fixed"
         sx={{ backgroundColor: "#1976D2", width: "100%", zIndex: 1201 }}
       >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          {/* Botón para abrir Sidebar */}
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingLeft: "40px",
+          }}
+        >
           <IconButton edge="start" color="inherit" onClick={toggleSidebar}>
-            <MenuIcon />
+            <MenuIcon sx={{ fontSize: "36px" }} />
           </IconButton>
 
-          {/* Mostrar Avatar o Casa según la ruta */}
+          <Typography
+            variant="h6"
+            sx={{
+              flexGrow: 1,
+              textAlign: "center",
+              paddingTop: "3px",
+              fontWeight: "bold",
+              letterSpacing: 1.5,
+              fontSize: "14px",
+            }}
+          >
+            {pageTitle}
+          </Typography>
+
           <IconButton
             onClick={() =>
-              navigate(location.pathname === "/profile" ? "/" : "/profile")
+              location.pathname === "/" ? navigate("/profile") : navigate("/")
             }
           >
             {isLoading ? (
               <CircularProgress size={24} color="inherit" />
-            ) : location.pathname === "/profile" ? (
-              <HomeIcon sx={{ color: "#fff", fontSize: 30 }} /> // 🔹 Icono de Casa cuando estamos en "/profile"
+            ) : location.pathname === "/" ? (
+              <Avatar sx={{ bgcolor: "#4CAF50" }}>{avatarInitial}</Avatar>
             ) : (
-              <Avatar sx={{ bgcolor: "#4CAF50" }}>{avatarInitial}</Avatar> // 🔹 Avatar en cualquier otra página
+              <HomeIcon sx={{ color: "#fff", fontSize: 30 }} />
             )}
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* Sidebar */}
       <Drawer anchor="left" open={openSidebar} onClose={toggleSidebar}>
         <Box
           sx={{
@@ -102,7 +128,7 @@ const Navbar = () => {
 
           <List sx={{ flexGrow: 1, paddingTop: 2 }}>
             <ListItem disablePadding>
-              <ListItemButton>
+              <ListItemButton onClick={() => navigate("/expenseEntry")}>
                 <AddIcon sx={{ marginRight: 1, color: "#1976D2" }} />
                 <ListItemText primary="Agregar Gastos" />
               </ListItemButton>
@@ -123,7 +149,6 @@ const Navbar = () => {
 
           <Divider />
 
-          {/* Botón de Cerrar Sesión */}
           <Button
             startIcon={<LogoutIcon sx={{ color: "red" }} />}
             onClick={handleLogout}
@@ -137,7 +162,6 @@ const Navbar = () => {
             Cerrar Sesión
           </Button>
 
-          {/* Firma */}
           <Typography
             variant="body2"
             color={theme.palette.text.primary}

@@ -1,12 +1,5 @@
 import { db } from "../db/firebase";
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 
 export const fetchUserData = async (userId: string) => {
   if (!userId) throw new Error("Usuario no autenticado");
@@ -19,27 +12,21 @@ export const fetchUserData = async (userId: string) => {
   }
 
   const userData = userSnap.data();
-
-  // 🔹 Extraer `variableExpenses` del documento del usuario (si existen)
   const variableExpenses = userData.variableExpenses ?? {};
 
-  // 🔹 Nueva query para obtener los gastos reales
-  const expensesQuery = query(
-    collection(db, "expenses"),
-    where("userId", "==", userId)
-  );
-  const expensesSnap = await getDocs(expensesQuery);
+  const expensesRef = collection(db, `users/${userId}/expenses`);
+  const expensesSnap = await getDocs(expensesRef);
 
   const realExpenses: Record<string, number> = {};
 
   expensesSnap.forEach((doc) => {
-    const { concept, amount } = doc.data();
-    if (realExpenses[concept]) {
-      realExpenses[concept] += amount; // Sumar si ya existe
+    const { category, amount } = doc.data();
+    if (realExpenses[category]) {
+      realExpenses[category] += amount; // Acumular monto por categoría
     } else {
-      realExpenses[concept] = amount; // Agregar nuevo concepto
+      realExpenses[category] = amount; // Inicializar categoría
     }
   });
 
-  return { variableExpenses, realExpenses }; // 🔹 Ahora devolvemos ambos correctamente
+  return { variableExpenses, realExpenses };
 };
