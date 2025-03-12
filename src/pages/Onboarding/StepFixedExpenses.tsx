@@ -14,7 +14,7 @@ const StepFixedExpenses = ({
   watch,
 }: StepOnBoarding) => {
   const [fixedExpenses, setFixedExpenses] = useState<
-    Record<string, { amount: number; order: number }>
+    Record<string, { amount: string; order: number }>
   >({});
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const currency: string = watch("currency") ?? "";
@@ -25,17 +25,18 @@ const StepFixedExpenses = ({
     const existingExpenses = getValues().fixedExpenses || {};
     delete existingExpenses.totalExpenses;
 
-    // 🔹 Garantizamos que cada valor es un objeto con `amount` y `order`
+    // ✅ Se asegura de que cada `value` tenga `amount` y `order`
     const updatedExpenses = Object.fromEntries(
       Object.entries(existingExpenses).map(([key, value], index) => {
-        const expense =
-          typeof value === "object" && value !== null
-            ? (value as { amount?: number; order?: number })
-            : { amount: 0, order: index + 1 }; // 🔥 Evita que un valor no sea un objeto válido
+        const expense = (value as { amount?: number; order?: number }) || {}; // 🔹 Se fuerza el tipo
 
         return [
           key,
-          { amount: expense.amount ?? 0, order: expense.order ?? index + 1 },
+          {
+            amount:
+              expense.amount !== undefined ? expense.amount.toString() : "", // 🔹 Convierte a string o deja vacío
+            order: expense.order !== undefined ? expense.order : index + 1, // 🔹 Asegura un número de orden válido
+          },
         ];
       })
     );
@@ -47,19 +48,21 @@ const StepFixedExpenses = ({
   }, []);
 
   const totalExpenses = Object.values(fixedExpenses)
-    .map((exp) => exp.amount || 0)
+    .map((exp) => parseFloat(exp.amount) || 0)
     .reduce((sum, amount) => sum + amount, 0);
 
   const isFormValid = Object.entries(fixedExpenses).every(
-    ([name, data]) => name.trim() !== "" && data.amount > 0
+    ([name, data]) => name.trim() !== "" && parseFloat(data.amount) > 0
   );
 
-  const EVA_TEXT = getEvaTexts(
-    "",
-    totalExpenses,
-    fixedExpenses.amount,
-    currency
+  const expensesAsNumbers = Object.fromEntries(
+    Object.entries(fixedExpenses).map(([key, value]) => [
+      key,
+      parseFloat(value.amount) || 0,
+    ])
   );
+
+  const EVA_TEXT = getEvaTexts("", totalExpenses, expensesAsNumbers, currency);
 
   const addExpense = () => {
     const newOrder =
@@ -69,7 +72,7 @@ const StepFixedExpenses = ({
 
     setFixedExpenses((prev) => ({
       ...prev,
-      [""]: { amount: 0, order: newOrder }, // 🔹 Se asigna el orden automáticamente
+      [""]: { amount: "", order: newOrder }, // 🔹 Empieza vacío en lugar de 0
     }));
 
     setErrors((prev) => ({ ...prev, [""]: false }));
@@ -95,19 +98,37 @@ const StepFixedExpenses = ({
       let updatedExpenses = { ...prev };
 
       if (field === "amount") {
-        const newAmount = value.replace(/[^0-9.]/g, ""); // Solo números y puntos decimales
+        // ✅ Solo permite números y un solo punto decimal
+        let newAmount = value.replace(/[^0-9.]/g, "");
+
+        // ✅ Evita más de un punto decimal
+        const dotCount = (newAmount.match(/\./g) || []).length;
+        if (dotCount > 1) {
+          newAmount = newAmount.slice(0, -1); // Elimina el último punto ingresado
+        }
+
+        // ✅ Limitar a solo 2 decimales
+        if (newAmount.includes(".")) {
+          const [integerPart, decimalPart] = newAmount.split(".");
+          newAmount =
+            decimalPart.length > 2
+              ? `${integerPart}.${decimalPart.slice(0, 2)}`
+              : newAmount;
+        }
+
         updatedExpenses[key] = {
           ...prev[key],
-          amount: newAmount === "" ? 0 : parseFloat(newAmount),
+          amount: newAmount, // 🔹 Permite string vacío, no pone 0 automáticamente
         };
       } else {
-        const newKey = value.trim(); // Evitar claves vacías
+        // ✅ Evita que el concepto contenga números
+        const newKey = value.replace(/[0-9]/g, "");
 
-        if (newKey !== key && newKey !== "") {
+        if (newKey !== key) {
           updatedExpenses[newKey] = {
             ...prev[key],
-            amount: prev[key]?.amount || 0,
-            order: prev[key]?.order ?? Object.keys(prev).length + 1, // Mantiene el orden
+            amount: prev[key]?.amount || "", // 🔹 Mantiene el monto asignado
+            order: prev[key]?.order ?? Object.keys(prev).length + 1, // 🔹 Mantiene el orden
           };
           delete updatedExpenses[key];
         }
@@ -122,7 +143,8 @@ const StepFixedExpenses = ({
       setHasInteracted(true);
       const updatedErrors: Record<string, boolean> = {};
       Object.entries(fixedExpenses).forEach(([name, data]) => {
-        updatedErrors[name] = name.trim() === "" || data.amount <= 0;
+        updatedErrors[name] =
+          name.trim() === "" || parseFloat(data.amount) <= 0;
       });
       setErrors(updatedErrors);
       return;
@@ -131,7 +153,7 @@ const StepFixedExpenses = ({
     setValue("fixedExpenses", { ...fixedExpenses, totalExpenses });
     onNext();
   };
-  console.log(fixedExpenses);
+
   return (
     <Box
       sx={{
@@ -192,14 +214,16 @@ const StepFixedExpenses = ({
                 size="small"
                 error={errors[key] && hasInteracted}
                 helperText={
-                  errors[key] && hasInteracted ? "Campo obligatorio" : ""
+                  errors[key] && hasInteracted
+                    ? "No puede ser solo números"
+                    : ""
                 }
               />
               <TextField
                 label="Monto"
                 variant="outlined"
                 type="text"
-                value={fixedExpenses[key]?.amount?.toString() || ""} // ✅ Muestra solo números
+                value={fixedExpenses[key]?.amount || ""} // ✅ Ahora el monto empieza vacío
                 onChange={(e) =>
                   handleInputChange(key, "amount", e.target.value)
                 }
