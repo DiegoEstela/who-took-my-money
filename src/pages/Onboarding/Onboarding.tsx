@@ -13,6 +13,7 @@ import StepCompletion from "./StepCompletion";
 import StepFinish from "./StepFinish";
 import { db } from "../../db/firebase";
 import { useNotification } from "../../context/useNotification";
+import StepSavings from "./StepSavings";
 
 type OnboardingFormData = {
   currency: string;
@@ -20,14 +21,16 @@ type OnboardingFormData = {
   salary?: number;
   fixedExpenses?: Record<string, number>;
   variableExpenses?: Record<string, { percentage: number; amount: number }>;
+  savings?: number;
 };
 
 const steps = [
   { key: "name", component: StepWelcome },
   { key: "salary", component: StepSalary },
+  { key: "savings", component: StepSavings },
   { key: "fixedExpenses", component: StepFixedExpenses },
-  { key: "VariableExpenses", component: StepCompletion },
-  { key: "StepFinish", component: StepFinish },
+  { key: "variableExpenses", component: StepCompletion },
+  { key: "finish", component: StepFinish },
 ];
 
 const Onboarding = () => {
@@ -46,7 +49,7 @@ const Onboarding = () => {
   });
 
   const { getValues, setValue, handleSubmit, watch } = methods;
-  console.log(getValues());
+
   if (loading || checkingUser) return <Loading />;
 
   const handleNext = () => {
@@ -71,8 +74,10 @@ const Onboarding = () => {
     try {
       await setDoc(doc(db, "users", user.uid), {
         ...data,
+        savings: data.savings || 0, // Guardar ahorro fuera de los gastos
         remainingAmount:
           (data.salary || 0) -
+          (data.savings || 0) -
           (data.fixedExpenses?.totalExpenses || 0) -
           Object.values(data.variableExpenses || {}).reduce(
             (sum, exp) => sum + exp.amount,
@@ -81,12 +86,8 @@ const Onboarding = () => {
         timestamp: new Date(),
       });
 
-      // 📌 Mostrar notificación de éxito
       showNotification("success", "¡Tu perfil ha sido creado con éxito! 🎉");
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      setTimeout(() => window.location.reload(), 2000);
     } catch (error) {
       console.error("Error al guardar en Firestore:", error);
     }

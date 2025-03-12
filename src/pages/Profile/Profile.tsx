@@ -114,7 +114,7 @@ const Profile = () => {
 
         <Typography variant="h6">
           📊 <strong>Ahorro:</strong> {CURRENCY_SYMBOLS[userData.currency]}
-          {userData.variableExpenses.Ahorro.amount.toFixed(2)}
+          {userData.ahorro.toLocaleString("es-ES")}
         </Typography>
       </Paper>
     </Box>

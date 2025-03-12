@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Box, Typography, Button, useTheme } from "@mui/material";
 import ChatBubble from "../../components/ChatBubble";
 import useFinancialProfile from "../../hooks/useFinancialProfile";
-import { getArturoTexts } from "../../utils/arturoTexts";
+import { getEvaTexts } from "../../utils/getEvaTexts";
 
 interface StepFinishProps {
   onBack: () => void;
@@ -11,16 +11,17 @@ interface StepFinishProps {
 }
 
 const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
-  const ARTURO_TEXT = getArturoTexts();
+  const EVA_TEXT = getEvaTexts();
   const theme = useTheme();
   const [step, setStep] = useState(1);
   const [showBubble, setShowBubble] = useState(true);
 
   const salary = getValues().salary || 0;
+  const savings = getValues().savings || 0;
   const currency = getValues().currency || "";
   const fixedExpenses = getValues().fixedExpenses || {};
   const variableExpenses = getValues().variableExpenses || {};
-  const { mensajeArturo } = useFinancialProfile(variableExpenses);
+  const { mensajeEva } = useFinancialProfile(variableExpenses);
 
   const totalFixedExpenses = fixedExpenses.totalExpenses || 0;
   const totalVariableExpenses: any = Object.values(variableExpenses).reduce(
@@ -30,7 +31,7 @@ const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
 
   // 🔹 Primer mensaje: El perfil financiero del usuario
   const firstMessage: React.ReactNode = (
-    <Box textAlign="center">{mensajeArturo}</Box>
+    <Box textAlign="center">{mensajeEva}</Box>
   );
 
   return (
@@ -59,16 +60,18 @@ const StepFinish = ({ getValues, handleSaveToDB }: StepFinishProps) => {
           {totalFixedExpenses.toLocaleString("es-ES")}
         </Typography>
         <Typography variant="body1" color={theme.palette.customColors.black}>
-          <b>🎯 Gastos Variables:</b>
-          {currency}
+          <b>🏦 Ahorros:</b> {currency} {savings.toLocaleString("es-ES")}
+        </Typography>
+        <Typography variant="body1" color={theme.palette.customColors.black}>
+          <b>🎯 Gastos Variables:</b> {currency}{" "}
           {totalVariableExpenses.toLocaleString("es-ES")}
         </Typography>
       </Box>
 
-      {/* Burbuja de Arturo con dos mensajes diferentes */}
+      {/* Burbuja de Eva con dos mensajes diferentes */}
       {showBubble && (
         <ChatBubble
-          text={step === 1 ? firstMessage : ARTURO_TEXT.ONBOARDING.STEP6}
+          text={step === 1 ? firstMessage : EVA_TEXT.ONBOARDING.STEP6}
           buttonText={step === 1 ? "Siguiente" : "Salir"}
           onButtonClick={() => {
             if (step === 1) {

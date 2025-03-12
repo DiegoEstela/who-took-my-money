@@ -1,18 +1,11 @@
 import { useState, useEffect } from "react";
-import { Box, TextField, Button, IconButton } from "@mui/material";
+import { Box, TextField, Button, IconButton, Typography } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
-import ChatBubbleBlock from "../../components/ChatBubbleBlock";
 import { handleAmountBlur, handleAmountChange } from "../../utils/formatUtils";
-import { getArturoTexts } from "../../utils/arturoTexts";
-
-interface StepFixedExpensesProps {
-  onNext: () => void;
-  onBack: () => void;
-  setValue: (name: string, value: any) => void;
-  getValues: () => any;
-  watch: (field: string) => void;
-}
+import { getEvaTexts } from "../../utils/getEvaTexts";
+import { StepOnBoarding } from "../../types/userProfile";
+import ChatBubble from "../../components/ChatBubble";
 
 const StepFixedExpenses = ({
   onNext,
@@ -20,36 +13,35 @@ const StepFixedExpenses = ({
   setValue,
   getValues,
   watch,
-}: StepFixedExpensesProps) => {
+}: StepOnBoarding) => {
   const [fixedExpenses, setFixedExpenses] = useState<Record<string, number>>(
     {}
   );
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const currency: string = watch("currency") ?? "";
+  const [showBubble, setShowBubble] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     const existingExpenses = { ...getValues().fixedExpenses };
     delete existingExpenses.totalExpenses;
     setFixedExpenses(existingExpenses);
+    const timer = setTimeout(() => setShowBubble(false), 3000); // Desaparece en 3 segundos
+    return () => clearTimeout(timer);
   }, []);
 
   const totalExpenses = Object.values(fixedExpenses)
-    .map((amount) => parseFloat(amount as any) || 0) // 🔹 Asegura que todos los valores sean numéricos
+    .map((amount) => parseFloat(amount as any) || 0)
     .reduce((sum, amount) => sum + amount, 0);
 
   const isFormValid = Object.entries(fixedExpenses).every(
     ([name, amount]) => name.trim() !== "" && amount > 0
   );
-  const ARTURO_TEXT = getArturoTexts(
-    "",
-    totalExpenses,
-    fixedExpenses,
-    currency
-  );
+  const EVA_TEXT = getEvaTexts("", totalExpenses, fixedExpenses, currency);
 
   const addExpense = () => {
-    setFixedExpenses({ ...fixedExpenses, "": 0 }); //
-    setErrors({ ...errors, "": true });
+    setFixedExpenses((prev) => ({ ...prev, "": 0 }));
+    setErrors((prev) => ({ ...prev, "": false }));
   };
 
   const removeExpense = (key: string) => {
@@ -67,11 +59,11 @@ const StepFixedExpenses = ({
     field: "name" | "amount",
     value: string
   ) => {
+    setHasInteracted(true);
     setFixedExpenses((prev) => {
       let updatedExpenses = { ...prev };
 
       if (field === "amount") {
-        // Permitir solo números y un solo punto decimal
         const amount = value.replace(/[^0-9.]/g, "");
         const validAmount =
           amount.split(".").length > 2 ? amount.slice(0, -1) : amount;
@@ -80,10 +72,9 @@ const StepFixedExpenses = ({
 
         setErrors((prevErrors) => ({
           ...prevErrors,
-          [key]: updatedExpenses[key] <= 0,
+          [key]: hasInteracted && updatedExpenses[key] <= 0,
         }));
       } else {
-        // Permitir solo letras y espacios en el concepto
         const newKey = value.replace(/[0-9]/g, "");
 
         if (newKey !== key) {
@@ -93,7 +84,7 @@ const StepFixedExpenses = ({
 
         setErrors((prevErrors) => ({
           ...prevErrors,
-          [newKey]: newKey.trim() === "",
+          [newKey]: hasInteracted && newKey.trim() === "",
         }));
       }
 
@@ -103,6 +94,7 @@ const StepFixedExpenses = ({
 
   const handleNext = () => {
     if (!isFormValid) {
+      setHasInteracted(true);
       const updatedErrors: Record<string, boolean> = {};
       Object.entries(fixedExpenses).forEach(([name, amount]) => {
         updatedErrors[name] = name.trim() === "" || amount <= 0;
@@ -112,39 +104,31 @@ const StepFixedExpenses = ({
     }
 
     setValue("fixedExpenses", { ...fixedExpenses, totalExpenses });
-    console.log("Fixed Expenses guardados:", {
-      ...fixedExpenses,
-      totalExpenses,
-    });
     onNext();
   };
 
   return (
     <Box
       sx={{
+        margin: 0,
+        padding: 0,
+        top: -40,
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         width: "100%",
         position: "relative",
-        paddingTop: "30px",
       }}
     >
-      <ChatBubbleBlock
-        text={ARTURO_TEXT.ONBOARDING.STEP3}
-        arturoSize={30}
-        imagePosition="left"
-        fontSize={14}
-        sx={{
-          position: "absolute",
-          top: "-50px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "90%",
-          maxWidth: "340px",
-        }}
-      />
-      {/* Contenedor de los gastos fijos */}
+      <Typography
+        variant="body1"
+        color="primary"
+        fontWeight="bold"
+        gutterBottom
+      >
+        {EVA_TEXT.ONBOARDING.STEP3}
+      </Typography>
+
+      <ChatBubble text={EVA_TEXT.ONBOARDING.STEP3} isVisible={showBubble} />
       <Box
         sx={{
           maxHeight: "35vh",
@@ -180,8 +164,10 @@ const StepFixedExpenses = ({
                 value={key}
                 onChange={(e) => handleInputChange(key, "name", e.target.value)}
                 size="small"
-                error={!!errors[key]}
-                helperText={errors[key] ? "Campo obligatorio" : ""}
+                error={errors[key] && hasInteracted}
+                helperText={
+                  errors[key] && hasInteracted ? "Campo obligatorio" : ""
+                }
               />
               <TextField
                 label="Monto"
@@ -189,7 +175,7 @@ const StepFixedExpenses = ({
                 type="text"
                 value={
                   fixedExpenses[key] === 0 ? "" : fixedExpenses[key].toString()
-                } // 🔹 Muestra "" en la UI si el valor es 0
+                }
                 onChange={(e) =>
                   handleAmountChange(
                     key,
@@ -202,10 +188,9 @@ const StepFixedExpenses = ({
                   handleAmountBlur(key, e.target.value, setFixedExpenses)
                 }
                 size="small"
-                error={!!errors[key]}
-                helperText={errors[key] ? "Menor a 0" : ""}
+                error={errors[key] && hasInteracted}
+                helperText={errors[key] && hasInteracted ? "Menor a 0" : ""}
               />
-
               <IconButton onClick={() => removeExpense(key)} color="error">
                 <Delete />
               </IconButton>
@@ -213,8 +198,6 @@ const StepFixedExpenses = ({
           ) : null
         )}
       </Box>
-
-      {/* Botón de agregar gasto centrado */}
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
         <Button
           variant="outlined"
@@ -225,7 +208,6 @@ const StepFixedExpenses = ({
           Agregar Gasto
         </Button>
       </Box>
-
       <StepNavigationBtn
         onBack={onBack}
         onNext={handleNext}

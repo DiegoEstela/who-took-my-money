@@ -7,7 +7,6 @@ export const fetchUserExpenses = async (
   endDate: Date
 ) => {
   if (!userId) throw new Error("Usuario no autenticado");
-  console.log(userId);
 
   const expensesRef = collection(db, `users/${userId}/expenses`);
   const q = query(

@@ -1,17 +1,10 @@
 import { useState } from "react";
-import { Box, TextField } from "@mui/material";
+import { Box, TextField, Typography } from "@mui/material";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
 import ChatBubble from "../../components/ChatBubble"; // Nueva burbuja temporal
-import ChatBubbleBlock from "../../components/ChatBubbleBlock";
-import { getArturoTexts } from "../../utils/arturoTexts";
 
-interface StepCompletionProps {
-  onNext: () => void;
-  onBack: () => void;
-  setValue: (name: string, value: any) => void;
-  getValues: () => any;
-  watch: (field: string) => any;
-}
+import { StepOnBoarding } from "../../types/userProfile";
+import { getEvaTexts } from "../../utils/getEvaTexts";
 
 const StepCompletion = ({
   onNext,
@@ -19,36 +12,37 @@ const StepCompletion = ({
   setValue,
   getValues,
   watch,
-}: StepCompletionProps) => {
+}: StepOnBoarding) => {
   const salary = getValues().salary || 0;
   const currency = watch("currency") || "USD"; // Moneda seleccionada
   const totalExpenses = getValues().fixedExpenses?.totalExpenses || 0;
-  const availableAmount = salary - totalExpenses; // Dinero disponible
+  const savings = getValues().savings || 0; // Asegurar que los ahorros están excluidos
+  const availableAmount = salary - totalExpenses - savings; // Dinero disponible después de ahorros
 
   // Estado para mostrar la burbuja inicial de Arturo
   const [showBubble, setShowBubble] = useState(true);
 
   const [variableExpenses, setVariableExpenses] = useState<
-    Record<string, { percentage: number; amount: number }>
+    Record<string, { percentage: string; amount: number }>
   >({
-    Ahorro: { percentage: 0, amount: 0 },
-    Comida: { percentage: 0, amount: 0 },
-    Ocio: { percentage: 0, amount: 0 },
-    Compras: { percentage: 0, amount: 0 },
-    Viajes: { percentage: 0, amount: 0 },
-    Otros: { percentage: 0, amount: 0 },
+    Transporte: { percentage: "", amount: 0 },
+    Comida: { percentage: "", amount: 0 },
+    Ocio: { percentage: "", amount: 0 },
+    Compras: { percentage: "", amount: 0 },
+    Viajes: { percentage: "", amount: 0 },
+    Otros: { percentage: "", amount: 0 },
   });
 
   // Calcular el total de los porcentajes asignados
   const totalPercentage = Object.values(variableExpenses).reduce(
-    (sum, exp) => sum + exp.percentage,
+    (sum, exp) => sum + (parseFloat(exp.percentage) || 0),
     0
   );
 
   // Calcular el porcentaje restante y el dinero restante a repartir
   const remainingPercentage = 100 - totalPercentage;
   const remainingAmount = (remainingPercentage * availableAmount) / 100;
-  const ARTURO_TEXT = getArturoTexts(
+  const EVA_TEXT = getEvaTexts(
     "",
     0,
     {},
@@ -59,17 +53,19 @@ const StepCompletion = ({
     availableAmount
   );
 
-  // 📝 **Mensaje Dinámico de Arturo en `ChatBubbleBlock`**
-
   // Manejar cambios en los inputs
   const handleInputChange = (category: string, value: string) => {
-    let newPercentage = Number(value.replace(/\D/g, "")) || 0; // Solo números
+    let newPercentage = value.replace(/\D/g, ""); // Solo números
 
-    if (newPercentage > 99) newPercentage = 99; // Evitar más del 99% en una sola categoría
+    if (newPercentage !== "" && parseFloat(newPercentage) > 99)
+      newPercentage = "99"; // Evitar más del 99% en una sola categoría
 
-    const newAmount = Number(
-      ((newPercentage * availableAmount) / 100).toFixed(2)
-    ); // 🔹 Mantiene solo dos decimales
+    const newAmount =
+      newPercentage !== ""
+        ? Number(
+            ((parseFloat(newPercentage) * availableAmount) / 100).toFixed(2)
+          )
+        : 0; // 🔹 Mantiene solo dos decimales, pero deja vacío si el input está vacío
 
     setVariableExpenses((prev) => ({
       ...prev,
@@ -79,7 +75,15 @@ const StepCompletion = ({
 
   // Guardar los datos antes de avanzar
   const handleNext = () => {
-    setValue("variableExpenses", variableExpenses); // Guardar en React Hook Form
+    setValue(
+      "variableExpenses",
+      Object.fromEntries(
+        Object.entries(variableExpenses).map(([category, data]) => [
+          category,
+          { percentage: parseFloat(data.percentage) || 0, amount: data.amount },
+        ])
+      )
+    ); // Guardar en React Hook Form sin strings vacíos
     onNext();
   };
 
@@ -95,29 +99,23 @@ const StepCompletion = ({
       }}
     >
       {/* Mostrar Burbuja Temporal Solo los Primeros 4 Segundos */}
-      {showBubble ? (
+      {showBubble && (
         <ChatBubble
-          text={ARTURO_TEXT.ONBOARDING.STEP4}
+          text={EVA_TEXT.ONBOARDING.STEP4}
           isVisible={showBubble}
           buttonText="Gracias"
           onButtonClick={() => setShowBubble(false)}
         />
-      ) : (
-        <ChatBubbleBlock
-          text={ARTURO_TEXT.ONBOARDING.STEP5}
-          arturoSize={30}
-          imagePosition="left"
-          fontSize={14}
-          sx={{
-            position: "absolute",
-            top: "-40px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "90%",
-            maxWidth: "340px",
-          }}
-        />
       )}
+
+      <Typography
+        variant="body1"
+        color="primary"
+        fontWeight="bold"
+        gutterBottom
+      >
+        {EVA_TEXT.ONBOARDING.STEP5}
+      </Typography>
 
       {/* Contenedor de los gastos variables */}
       <Box sx={{ width: "100%" }}>
@@ -140,7 +138,7 @@ const StepCompletion = ({
               size="small"
             />
             <TextField
-              label="% Asignado"
+              label="%"
               variant="outlined"
               type="text"
               value={data.percentage}

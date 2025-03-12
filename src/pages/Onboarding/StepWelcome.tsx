@@ -2,18 +2,18 @@ import { useState } from "react";
 import { Box, TextField, Button } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import ChatBubble from "../../components/ChatBubble";
-import { getArturoTexts } from "../../utils/arturoTexts";
+import { getEvaTexts } from "../../utils/getEvaTexts";
 
 const StepWelcome = ({ onNext }: { onNext: () => void }) => {
   const { register, watch } = useFormContext();
   const name = watch("name", "");
   const [showBubble, setShowBubble] = useState(true);
-  const ARTURO_TEXT = getArturoTexts();
+  const EVA_TEXT = getEvaTexts();
 
   return (
     <Box textAlign="center">
       <ChatBubble
-        text={ARTURO_TEXT.ONBOARDING.STEP1}
+        text={EVA_TEXT.ONBOARDING.STEP1}
         onButtonClick={() => setShowBubble(false)}
         isVisible={showBubble}
         buttonText="Empezar"

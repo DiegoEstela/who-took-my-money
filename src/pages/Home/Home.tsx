@@ -25,19 +25,19 @@ const Home = () => {
   });
 
   const dayOfMonth = today.getDate();
-  let arturoMessage = "";
+  let evaMessage = "";
   if (dayOfMonth <= 10) {
-    arturoMessage =
+    evaMessage =
       "🤑 ¡Nuevo mes, nueva oportunidad para no gastarlo todo en el primer finde! Sé fuerte. 💪💸";
   } else if (dayOfMonth <= 20) {
-    arturoMessage =
+    evaMessage =
       "🤔 Mitad de mes... ¿Tu presupuesto sigue en forma o ya necesita un rescate? 🚑💸";
   } else {
-    arturoMessage =
+    evaMessage =
       "😨 Últimos días del mes... Si el dinero hablara, ¿te reclamaría manutención? 🫣📉";
   }
 
-  // 🔹 Estado para mostrar la burbuja de Arturo y ocultarla después de 2 segundos
+  // 🔹 Estado para mostrar la burbuja de eva y ocultarla después de 2 segundos
   const [showChatBubble, setShowChatBubble] = useState(true);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,7 +71,7 @@ const Home = () => {
         <Typography variant="body1">No hay gastos registrados aún.</Typography>
       )}
 
-      <ChatBubble text={arturoMessage} isVisible={showChatBubble} />
+      <ChatBubble text={evaMessage} isVisible={showChatBubble} />
     </Box>
   );
 };

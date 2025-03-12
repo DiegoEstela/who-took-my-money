@@ -11,20 +11,20 @@ const useFinancialProfile = (
       (variableExpenses.Viajes?.percentage || 0);
 
     let perfil = "";
-    let mensajeArturo = "";
+    let mensajeEva = "";
 
     if (totalAhorro >= 30) {
       perfil = "El Ahorrista Radical 🏦💰";
-      mensajeArturo = `¡Wow! Se nota que estás ahorrando para el apocalipsis financiero. 💸 No está mal ser precavido, pero recuerda que también puedes disfrutar un poco. ¡Un gustito de vez en cuando no mata! 😉`;
+      mensajeEva = `¡Wow! Se nota que estás ahorrando para el apocalipsis financiero. 💸 No está mal ser precavido, pero recuerda que también puedes disfrutar un poco. ¡Un gustito de vez en cuando no mata! 😉`;
     } else if (totalOcio >= 50) {
       perfil = "El Disfrutón Profesional 🍾✈️";
-      mensajeArturo = `¡Vaya, ${perfil}! Se nota que sabes cómo vivir la vida. 🌍🎉 Gastar en experiencias está genial, pero no te olvides de guardar un poquito para el futuro... ¡o al menos para cuando tu tarjeta te mire feo! 😂`;
+      mensajeEva = `¡Vaya, ${perfil}! Se nota que sabes cómo vivir la vida. 🌍🎉 Gastar en experiencias está genial, pero no te olvides de guardar un poquito para el futuro... ¡o al menos para cuando tu tarjeta te mire feo! 😂`;
     } else {
       perfil = "El Equilibrado Zen ⚖️🧘";
-      mensajeArturo = `¡Felicidades! Tienes un balance casi perfecto en tus finanzas. 🏆 Te das tus gustos, pero también piensas en el futuro. Arturo aprueba este presupuesto con ⭐ 5 estrellas. ¡Sigue así! 🚀`;
+      mensajeEva = `¡Felicidades! Tienes un balance casi perfecto en tus finanzas. 🏆 Te das tus gustos, pero también piensas en el futuro. Eva aprueba este presupuesto con ⭐ 5 estrellas. ¡Sigue así! 🚀`;
     }
 
-    return { perfil, mensajeArturo };
+    return { perfil, mensajeEva };
   }, [variableExpenses]);
 };
 

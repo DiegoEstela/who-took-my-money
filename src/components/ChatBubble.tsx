@@ -1,6 +1,6 @@
 import { Typography, useTheme, Box, Button } from "@mui/material";
 import { motion } from "framer-motion";
-import arturoImg from "../assets/arturo.png";
+import evaImg from "../assets/eva.png";
 import React from "react";
 
 interface ChatBubbleProps {
@@ -28,7 +28,7 @@ const ChatBubble = ({
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <Box sx={styles.chatBubble(theme)}>
-          <Box component="img" src={arturoImg} alt="Arturo" sx={styles.image} />
+          <Box component="img" src={evaImg} alt="Eva" sx={styles.image} />
 
           <Box sx={styles.textContainer}>
             {typeof text === "string" ? (
@@ -72,7 +72,7 @@ const styles = {
   },
   chatBubble: (theme: any) => ({
     position: "fixed",
-    top: "2vh",
+    top: "8vh",
     left: "50%",
     transform: "translateX(-50%)",
     display: "flex",

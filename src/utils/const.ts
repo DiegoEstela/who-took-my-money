@@ -1,5 +1,5 @@
 export const EXPENSES_CATEGORY = [
-  "Ahorro",
+  "Transporte",
   "Comida",
   "Ocio",
   "Compras",
@@ -8,7 +8,7 @@ export const EXPENSES_CATEGORY = [
 ];
 
 export const CATEGORIES_MAP = [
-  { id: "Ahorro", label: "Ahorro", icon: "💰" },
+  { id: "Transporte", label: "Transporte", icon: "🚌" },
   { id: "Comida", label: "Comida", icon: "🍔" },
   { id: "Ocio", label: "Ocio", icon: "🎮" },
   { id: "Compras", label: "Compras", icon: "🛋️" },

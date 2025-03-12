@@ -1,13 +1,13 @@
 import { Typography, useTheme, Box, Button } from "@mui/material";
 import { motion } from "framer-motion";
-import arturoImg from "../assets/arturo.png";
+import evaImg from "../assets/eva.png";
 import React from "react";
 
 interface ChatBubbleBlockProps {
   text: string | React.ReactNode;
   buttonText?: string;
   onButtonClick?: () => void;
-  arturoSize?: number;
+  evaSize?: number;
   imagePosition?: "left" | "right" | "top";
   fontSize?: number;
   sx?: any; // 🔹 Agregamos la prop sx para permitir estilos personalizados
@@ -17,7 +17,7 @@ const ChatBubbleBlock = ({
   text,
   buttonText,
   onButtonClick,
-  arturoSize = 60,
+  evaSize = 60,
   imagePosition = "top",
   fontSize = 16,
   sx = {}, // 🔹 Valor por defecto
@@ -34,9 +34,9 @@ const ChatBubbleBlock = ({
         {imagePosition !== "right" && (
           <Box
             component="img"
-            src={arturoImg}
-            alt="Arturo"
-            sx={{ ...styles.image, width: arturoSize, height: arturoSize }}
+            src={evaImg}
+            alt="eva"
+            sx={{ ...styles.image, width: evaSize, height: evaSize }}
           />
         )}
 
@@ -55,9 +55,9 @@ const ChatBubbleBlock = ({
         {imagePosition === "right" && (
           <Box
             component="img"
-            src={arturoImg}
-            alt="Arturo"
-            sx={{ ...styles.image, width: arturoSize, height: arturoSize }}
+            src={evaImg}
+            alt="eva"
+            sx={{ ...styles.image, width: evaSize, height: evaSize }}
           />
         )}
       </Box>

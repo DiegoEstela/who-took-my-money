@@ -16,7 +16,7 @@ const useUserProfile = () => {
   } = useQuery<UserProfile | null>({
     queryKey: ["userProfile", userId],
     queryFn: async () => {
-      if (!userId) return null; // 🔹 Evita ejecutar la consulta si no hay usuario
+      if (!userId) return null;
       return fetchUserProfile(userId);
     },
     enabled: !!userId,

@@ -17,7 +17,6 @@ const AuthForm = ({ isRegister, onSuccess }: AuthFormProps) => {
     try {
       if (isRegister) {
         await registerUser(email, password);
-        showNotification("success", "Registro exitoso");
       } else {
         await loginUser(email, password);
         showNotification("success", "Inicio de sesión exitoso");

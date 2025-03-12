@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 
-export const getArturoTexts = (
+export const getEvaTexts = (
   name?: string,
   totalExpenses: number = 0,
   fixedExpenses: Record<string, number> = {},
@@ -10,7 +10,7 @@ export const getArturoTexts = (
   totalPercentage: number = 0,
   availableAmount: number = 0
 ) => {
-  // mensaje base de Arturo para STEP3
+  // mensaje base de Eva para STEP3
   let step3Message = "¿Me podrias decir cuáles son tus gastos fijos?";
 
   if (totalExpenses > 0) {
@@ -25,7 +25,7 @@ export const getArturoTexts = (
     )}`;
   }
 
-  // mensaje base de Arturo para STEP4
+  // mensaje base de Eva para STEP4
 
   let step5Message = `Después de pagar tus gastos fijos de ${currency} ${totalExpenses.toLocaleString(
     "es-ES"
@@ -45,10 +45,10 @@ export const getArturoTexts = (
   return {
     ONBOARDING: {
       STEP1:
-        "¡Hola! Soy Arturo, tu asistente financiero. Antes de empezar, me gustaría saber cómo te llamas.",
+        "¡Hola! Soy Eva, tu asistente financiera. Antes de empezar, me gustaría saber cómo te llamas.",
       STEP2: `Eh... ${
         name ?? "usuario"
-      }, esto es un poco incómodo, pero... ¿me podrías decir cuál es tu sueldo mensual y en qué moneda lo manejas? Es importante para que puedas aprovechar al máximo la app. ¡Palabra de Arturo! 💰🤫`,
+      }, esto es un poco incómodo, pero... ¿me podrías decir cuál es tu sueldo mensual y en qué moneda lo manejas? Es importante para que puedas aprovechar al máximo la app. ¡Palabra de Eva! 💰🤫`,
       STEP3: step3Message,
       STEP4: (
         <Box>
@@ -86,7 +86,7 @@ export const getArturoTexts = (
             }}
           >
             <li>
-              📌 <strong>Ahorro:</strong> 20%
+              📌 <strong>Transporte:</strong> 10%
             </li>
             <li>
               📌 <strong>Comida:</strong> 30%
@@ -98,10 +98,10 @@ export const getArturoTexts = (
               📌 <strong>Compras:</strong> 10%
             </li>
             <li>
-              📌 <strong>Viajes:</strong> 15%
+              📌 <strong>Viajes:</strong> 20%
             </li>
             <li>
-              📌 <strong>Otros:</strong> 10% (Para lo que no encaje en las demás
+              📌 <strong>Otros:</strong> 15% (Para lo que no encaje en las demás
               categorías)
             </li>
           </ul>
@@ -141,6 +141,8 @@ export const getArturoTexts = (
           </Typography>
         </Box>
       ),
+      STEP7:
+        "Para organizar mejor tu dinero, asigna un porcentaje de tu salario al ahorro. Te recomendamos al menos un 15%, pero puedes ajustarlo según tus necesidades. Usa el control deslizante para ello. Este es un estimativo, luego veremos cuánto lograste ahorrar realmente.",
     },
   };
 };

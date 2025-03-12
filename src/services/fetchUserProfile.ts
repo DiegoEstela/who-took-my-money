@@ -19,7 +19,7 @@ export const fetchUserProfile = async (userId: string) => {
 
       return {
         name: userData.name || "Usuario",
-        email: userData.email || "Sin email",
+        ahorro: userData.savings || 0,
         avatar: userData.avatar || null,
         salary: parseFloat(userData.salary) || 0,
         currency: userData.currency || "USD",
