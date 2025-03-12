@@ -95,7 +95,7 @@ const StepCompletion = ({
         alignItems: "center",
         width: "100%",
         position: "relative",
-        paddingTop: "50px",
+        top: -30,
       }}
     >
       {/* Mostrar Burbuja Temporal Solo los Primeros 4 Segundos */}
@@ -113,6 +113,7 @@ const StepCompletion = ({
         color="primary"
         fontWeight="bold"
         gutterBottom
+        marginBottom={1}
       >
         {EVA_TEXT.ONBOARDING.STEP5}
       </Typography>

@@ -5,9 +5,8 @@ const BookBackground = ({ children }: { children: ReactNode }) => {
   return (
     <Box
       sx={{
-        maxWidth: "800px",
-        width: "90%",
-        minHeight: "80vh",
+        height: "90vh",
+        width: "92%",
         padding: "20px",
         background: "rgba(255, 255, 255, 0.85)", // 📌 Fondo semi-transparente simulando papel
         borderRadius: "15px",

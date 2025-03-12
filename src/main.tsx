@@ -16,7 +16,7 @@ createRoot(document.getElementById("root")!).render(
           flexDirection: "column",
           textAlign: "center",
           alignItems: "center",
-          height: "100vh",
+          minHeight: "100dvh", // Altura dinámica para evitar problemas en móviles
           width: "100vw",
           background:
             "linear-gradient(135deg,rgb(26, 133, 124),rgb(56, 195, 181))", // Mantiene el fondo de colores en desktop y mobile

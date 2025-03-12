@@ -10,7 +10,7 @@ const StepSavings = ({ onNext, onBack, setValue, getValues }: any) => {
   const recommendedSavings = Math.min(
     20,
     Math.max(10, Math.floor(((salary * 0.15) / salary) * 100))
-  ); // Recomendación entre 10% y 20%
+  );
   const [savingsPercentage, setSavingsPercentage] = useState(
     getValues("savingsPercentage") || recommendedSavings
   );

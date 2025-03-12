@@ -72,7 +72,7 @@ const styles = {
   },
   chatBubble: (theme: any) => ({
     position: "fixed",
-    top: "8vh",
+    top: "4vh",
     left: "50%",
     transform: "translateX(-50%)",
     display: "flex",

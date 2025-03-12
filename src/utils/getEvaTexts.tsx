@@ -11,7 +11,7 @@ export const getEvaTexts = (
   availableAmount: number = 0
 ) => {
   // mensaje base de Eva para STEP3
-  let step3Message = "¿Me podrias decir cuáles son tus gastos fijos?";
+  let step3Message = "¿Cuáles son tus gastos fijos?";
 
   if (totalExpenses > 0) {
     step3Message = `Tus gastos fijos suman: ${currency} ${totalExpenses.toLocaleString(
