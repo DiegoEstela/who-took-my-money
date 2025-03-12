@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Box, TextField, Button, IconButton, Typography } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
 import StepNavigationBtn from "../../components/StepNavigationBtn";
-import { handleAmountBlur, handleAmountChange } from "../../utils/formatUtils";
 import { getEvaTexts } from "../../utils/getEvaTexts";
 import { StepOnBoarding } from "../../types/userProfile";
 import ChatBubble from "../../components/ChatBubble";
@@ -14,34 +13,66 @@ const StepFixedExpenses = ({
   getValues,
   watch,
 }: StepOnBoarding) => {
-  const [fixedExpenses, setFixedExpenses] = useState<Record<string, number>>(
-    {}
-  );
+  const [fixedExpenses, setFixedExpenses] = useState<
+    Record<string, { amount: number; order: number }>
+  >({});
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const currency: string = watch("currency") ?? "";
   const [showBubble, setShowBubble] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
-    const existingExpenses = { ...getValues().fixedExpenses };
+    const existingExpenses = getValues().fixedExpenses || {};
     delete existingExpenses.totalExpenses;
-    setFixedExpenses(existingExpenses);
-    const timer = setTimeout(() => setShowBubble(false), 3000); // Desaparece en 3 segundos
+
+    // 🔹 Garantizamos que cada valor es un objeto con `amount` y `order`
+    const updatedExpenses = Object.fromEntries(
+      Object.entries(existingExpenses).map(([key, value], index) => {
+        const expense =
+          typeof value === "object" && value !== null
+            ? (value as { amount?: number; order?: number })
+            : { amount: 0, order: index + 1 }; // 🔥 Evita que un valor no sea un objeto válido
+
+        return [
+          key,
+          { amount: expense.amount ?? 0, order: expense.order ?? index + 1 },
+        ];
+      })
+    );
+
+    setFixedExpenses(updatedExpenses);
+
+    const timer = setTimeout(() => setShowBubble(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
   const totalExpenses = Object.values(fixedExpenses)
-    .map((amount) => parseFloat(amount as any) || 0)
+    .map((exp) => exp.amount || 0)
     .reduce((sum, amount) => sum + amount, 0);
 
   const isFormValid = Object.entries(fixedExpenses).every(
-    ([name, amount]) => name.trim() !== "" && amount > 0
+    ([name, data]) => name.trim() !== "" && data.amount > 0
   );
-  const EVA_TEXT = getEvaTexts("", totalExpenses, fixedExpenses, currency);
+
+  const EVA_TEXT = getEvaTexts(
+    "",
+    totalExpenses,
+    fixedExpenses.amount,
+    currency
+  );
 
   const addExpense = () => {
-    setFixedExpenses((prev) => ({ ...prev, "": 0 }));
-    setErrors((prev) => ({ ...prev, "": false }));
+    const newOrder =
+      Object.keys(fixedExpenses).length > 0
+        ? Math.max(...Object.values(fixedExpenses).map((exp) => exp.order)) + 1
+        : 1;
+
+    setFixedExpenses((prev) => ({
+      ...prev,
+      [""]: { amount: 0, order: newOrder }, // 🔹 Se asigna el orden automáticamente
+    }));
+
+    setErrors((prev) => ({ ...prev, [""]: false }));
   };
 
   const removeExpense = (key: string) => {
@@ -64,28 +95,22 @@ const StepFixedExpenses = ({
       let updatedExpenses = { ...prev };
 
       if (field === "amount") {
-        const amount = value.replace(/[^0-9.]/g, "");
-        const validAmount =
-          amount.split(".").length > 2 ? amount.slice(0, -1) : amount;
-
-        updatedExpenses[key] = validAmount === "" ? 0 : parseFloat(validAmount);
-
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          [key]: hasInteracted && updatedExpenses[key] <= 0,
-        }));
+        const newAmount = value.replace(/[^0-9.]/g, ""); // Solo números y puntos decimales
+        updatedExpenses[key] = {
+          ...prev[key],
+          amount: newAmount === "" ? 0 : parseFloat(newAmount),
+        };
       } else {
-        const newKey = value.replace(/[0-9]/g, "");
+        const newKey = value.trim(); // Evitar claves vacías
 
-        if (newKey !== key) {
-          updatedExpenses[newKey] = updatedExpenses[key] || 0;
+        if (newKey !== key && newKey !== "") {
+          updatedExpenses[newKey] = {
+            ...prev[key],
+            amount: prev[key]?.amount || 0,
+            order: prev[key]?.order ?? Object.keys(prev).length + 1, // Mantiene el orden
+          };
           delete updatedExpenses[key];
         }
-
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          [newKey]: hasInteracted && newKey.trim() === "",
-        }));
       }
 
       return updatedExpenses;
@@ -96,8 +121,8 @@ const StepFixedExpenses = ({
     if (!isFormValid) {
       setHasInteracted(true);
       const updatedErrors: Record<string, boolean> = {};
-      Object.entries(fixedExpenses).forEach(([name, amount]) => {
-        updatedErrors[name] = name.trim() === "" || amount <= 0;
+      Object.entries(fixedExpenses).forEach(([name, data]) => {
+        updatedErrors[name] = name.trim() === "" || data.amount <= 0;
       });
       setErrors(updatedErrors);
       return;
@@ -106,7 +131,7 @@ const StepFixedExpenses = ({
     setValue("fixedExpenses", { ...fixedExpenses, totalExpenses });
     onNext();
   };
-
+  console.log(fixedExpenses);
   return (
     <Box
       sx={{
@@ -129,6 +154,7 @@ const StepFixedExpenses = ({
       </Typography>
 
       <ChatBubble text={EVA_TEXT.ONBOARDING.STEP3} isVisible={showBubble} />
+
       <Box
         sx={{
           maxHeight: "35vh",
@@ -146,7 +172,7 @@ const StepFixedExpenses = ({
           },
         }}
       >
-        {Object.entries(fixedExpenses).map(([key], index) =>
+        {Object.entries(fixedExpenses).map(([key, _data], index) =>
           key !== "totalExpenses" ? (
             <Box
               key={index}
@@ -173,24 +199,17 @@ const StepFixedExpenses = ({
                 label="Monto"
                 variant="outlined"
                 type="text"
-                value={
-                  fixedExpenses[key] === 0 ? "" : fixedExpenses[key].toString()
-                }
+                value={fixedExpenses[key]?.amount?.toString() || ""} // ✅ Muestra solo números
                 onChange={(e) =>
-                  handleAmountChange(
-                    key,
-                    e.target.value,
-                    setFixedExpenses,
-                    setErrors
-                  )
-                }
-                onBlur={(e) =>
-                  handleAmountBlur(key, e.target.value, setFixedExpenses)
+                  handleInputChange(key, "amount", e.target.value)
                 }
                 size="small"
                 error={errors[key] && hasInteracted}
-                helperText={errors[key] && hasInteracted ? "Menor a 0" : ""}
+                helperText={
+                  errors[key] && hasInteracted ? "Debe ser mayor a 0" : ""
+                }
               />
+
               <IconButton onClick={() => removeExpense(key)} color="error">
                 <Delete />
               </IconButton>
@@ -198,6 +217,7 @@ const StepFixedExpenses = ({
           ) : null
         )}
       </Box>
+
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
         <Button
           variant="outlined"
@@ -208,6 +228,7 @@ const StepFixedExpenses = ({
           Agregar Gasto
         </Button>
       </Box>
+
       <StepNavigationBtn
         onBack={onBack}
         onNext={handleNext}

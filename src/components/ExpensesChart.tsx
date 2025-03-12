@@ -16,10 +16,10 @@ const ExpensesChart = ({
   realExpenses,
 }: ExpensesChartProps) => {
   return (
-    <Box sx={{ mt: 3 }}>
+    <Box sx={{ mt: 1 }}>
       {Object.entries(variableExpenses).map(([category, data]) => {
-        const estimatedAmount = data.amount; // 💰 Lo que el usuario planificó gastar
-        const spentAmount = realExpenses[category] || 0; // 🔍 Lo que realmente gastó
+        const estimatedAmount = data.amount;
+        const spentAmount = realExpenses[category] || 0;
         const progress = Math.min((spentAmount / estimatedAmount) * 100, 100);
         const progressColor = getProgressColor(progress);
 

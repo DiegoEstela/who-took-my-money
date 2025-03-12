@@ -10,6 +10,7 @@ import Navbar from "./components/Navbar";
 import Profile from "./pages/Profile/Profile";
 import ExpenseEntry from "./pages/ExpenseEntry/ExpenseEntry";
 import ExpenseHistory from "./pages/ExpenseHistory/ExpenseHistory";
+import Savings from "./pages/Savings/Savings";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/expenseEntry" element={<ExpenseEntry />} />
             <Route path="/expenseHistory" element={<ExpenseHistory />} />
+            <Route path="/savings" element={<Savings />} />
 
             <Route
               path="/"

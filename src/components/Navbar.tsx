@@ -20,16 +20,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
-import BlockIcon from "@mui/icons-material/Block";
-import AddIcon from "@mui/icons-material/Add";
-
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import CloseIcon from "@mui/icons-material/Close";
 import { signOut } from "firebase/auth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserProfile } from "../services/fetchUserProfile";
 import { auth } from "../db/firebase";
 import { PAGES_TITLES } from "../utils/const";
+import { MODULES } from "../utils/SidebarModules";
 
 // Diccionario de títulos de página
 
@@ -122,28 +119,18 @@ const Navbar = () => {
           </Box>
 
           <List sx={{ flexGrow: 1, paddingTop: 2 }}>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => handleNavigation("/expenseEntry")}>
-                <AddIcon sx={{ marginRight: 1, color: "#1976D2" }} />
-                <ListItemText primary="Agregar Gastos" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={() => handleNavigation("/expenseHistory")}
-              >
-                <ReceiptLongIcon sx={{ marginRight: 1, color: "#4CAF50" }} />
-                <ListItemText primary="Listado de gastos" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton disabled>
-                <BlockIcon sx={{ marginRight: 1, color: "#FF9800" }} />
-                <ListItemText primary="Compartir Gastos (Próximamente)" />
-              </ListItemButton>
-            </ListItem>
+            {MODULES.sort((a, b) => a.order - b.order).map((module) => (
+              <ListItem key={module.id} disablePadding>
+                <ListItemButton
+                  onClick={() => handleNavigation(module.path)}
+                  sx={module.sx}
+                >
+                  <Box sx={{ marginRight: 1 }}>{module.icon}</Box>
+                  <ListItemText primary={module.label} />
+                </ListItemButton>
+              </ListItem>
+            ))}
           </List>
-
           <Divider />
 
           <Button

@@ -31,8 +31,7 @@ const StepSavings = ({ onNext, onBack, setValue, getValues }: any) => {
     salary
   );
 
-  const handleChange = (event: any, newValue: any) => {
-    console.log(event);
+  const handleChange = (_event: any, newValue: any) => {
     setSavingsPercentage(newValue);
   };
 

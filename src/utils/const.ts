@@ -1,19 +1,29 @@
 export const EXPENSES_CATEGORY = [
-  "Transporte",
   "Comida",
-  "Ocio",
+  "Transporte",
   "Compras",
+  "Ocio",
   "Viajes",
   "Otros",
 ];
 
 export const CATEGORIES_MAP = [
-  { id: "Transporte", label: "Transporte", icon: "🚌" },
   { id: "Comida", label: "Comida", icon: "🍔" },
-  { id: "Ocio", label: "Ocio", icon: "🎮" },
   { id: "Compras", label: "Compras", icon: "🛋️" },
+  { id: "Transporte", label: "Transporte", icon: "🚌" },
+  { id: "Ocio", label: "Ocio", icon: "🎮" },
   { id: "Viajes", label: "Viajes", icon: "✈️" },
   { id: "Otros", label: "Otros", icon: "🔹" },
+];
+
+export const ORDERED_CATEGORIES = [
+  "Comida",
+  "Compras",
+  "Transporte",
+  "Viajes",
+  "Ocio",
+  "Otros",
+  "Ahorros",
 ];
 
 export const PAGES_TITLES: Record<string, string> = {

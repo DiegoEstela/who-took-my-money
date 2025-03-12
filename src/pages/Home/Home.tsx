@@ -57,10 +57,9 @@ const Home = () => {
   return (
     <Box sx={{ paddingTop: 5 }}>
       {/* ✅ Nuevo título dinámico con fecha */}
-      <Typography variant="h5" fontWeight="bold">
-        📊 Tus gastos
+      <Typography variant="h6" fontWeight="bold">
+        📊 Tus gastos {formattedDate}
       </Typography>
-      <Typography variant="h5"> {formattedDate}</Typography>
 
       {Object.keys(variableExpenses).length > 0 ? (
         <ExpensesChart
